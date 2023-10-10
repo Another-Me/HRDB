@@ -1,0 +1,148 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>PositionShow</title>
+</head>
+<body>
+    <div id="app">
+
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>您正在做的业务是：人力资源--客户化设置--人力资源档案管理设置--职位设置  </el-breadcrumb-item>
+                </el-breadcrumb>
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>当前可变更是职位发布总数：{{rows}}例  </el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+
+            <div>
+                <el-table :data="tableData"
+                          style="width: 100%"
+                          max-height="250">
+
+                    <el-table-column prop="MajorName"
+                                     label="职位名称">
+                    </el-table-column>
+                    <el-table-column prop="SecondKindName"
+                                     label="公司名称">
+                    </el-table-column>
+                    <el-table-column prop="HumanAmount"
+                                     label="招聘人数">
+                    </el-table-column>
+                    <el-table-column prop="RegistTime"
+                                     label="发布时间">
+                    </el-table-column>
+                    <el-table-column prop="Deadline"
+                                     label="截止时间">
+                    </el-table-column>
+                    <el-table-column fixed="right"
+                                     label="操作"
+                                     width="120">
+                        <template slot-scope="scope">
+                            <el-button type="text"
+                                       v-on:click="update(scope.row.MreId)"
+                                       size="small">
+                                修改
+                            </el-button>
+                            <el-button type="text"
+                                       v-on:click="Delete(scope.row.MreId)"
+                                       size="small">
+                                删除
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <el-pagination v-on:size-change="handleSizeChange"
+                               v-on:current-change="handleCurrentChange"
+                               :currentpage="currentPage"
+                               :page-sizes="[3, 6, 9, 12]"
+                               :page-size="pageSize"
+                               layout="total, sizes, prev, pager, next, jumper"
+                               :total="rows">
+                </el-pagination>
+            </div>
+        </el-card>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                currentPage: 1,
+                pageSize: 3,
+                rows: 1,
+
+            },
+            methods: {
+                fill() {
+                    axios.get('/Recruiting/EMRFenYe', {
+                        params: {
+                            currentPage: this.currentPage,
+                            pageSize: this.pageSize
+                        }
+                    })
+                        .then(res => {
+                            console.log(res);
+                            this.tableData = res.data.List;
+                            this.rows = res.data.Rows;
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                update(MreId) {
+                   
+                    window.location = "/Recruiting/PositionUpdateShow/";
+                    localStorage.setItem('IsMreId', MreId);
+                },
+                Delete(MreId) {
+                    
+                    if (confirm('确认删除吗')) {
+                        axios.get('/Recruiting/EMRDelete/' + MreId)
+                            .then(res => {
+                                if (res.data > 0) {
+                                    alert("删除成功");
+                                    this.currentPage = 1;
+                                    this.fill();
+                                } else {
+                                    alert("删除失败")
+                                }
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
+                    }
+                },
+                handleSizeChange: function (size) {
+                    this.pageSize = size;
+                    this.currentPage = 1;
+                    this.fill();
+                },
+                handleCurrentChange: function (page) {
+                    this.currentPage = page;
+                    this.fill();
+                },
+
+            },
+            mounted: function () {
+                this.currentPage = 1;
+                this.fill();
+
+            }
+        });
+    </script>
+</body>
+</html>

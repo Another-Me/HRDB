@@ -1,0 +1,107 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>薪资标准登记复核</title>
+</head>
+<body>
+    <div id="app">
+        <el-table :data="tableData"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="StandardId"
+                             label="薪酬标准编号"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="StandardName"
+                             label="薪酬标准名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="Designer"
+                             label="制定人">
+            </el-table-column>
+            <el-table-column prop="RegistTime"
+                             label="登记时间"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="SalarySum"
+                             label="薪酬总额"
+                             width="180">
+            </el-table-column>
+            <el-table-column label="复核"
+                             width="180">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle v-on:click="zhuan(scope.row)"></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination v-on:size-change="handleSizeChange"
+                       v-on:current-change="handleCurrentChange"
+                       :current-page="currentPage"
+                       :page-sizes="[3, 6, 9, 12]"
+                       :page-size="pageSize"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="rows">
+        </el-pagination>
+    </div>
+    <script type="text/javascript">
+        var sj = "";
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                currentPage: 1,
+                pageSize: 3,
+                rows: 1
+            },
+            methods: {
+                fill() {
+                    axios.get('/Salaryscale/SSFenye', {
+                        params: {
+                            CurrentPage: this.currentPage,
+                            PageSize: this.pageSize
+                        }
+                    })
+                        .then(res => {
+                            //console.log(res.data.List);
+                            this.tableData = res.data.List
+                            this.rows = res.data.Rows
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            alert("SS分页查询失败");
+                        })
+                },
+                //换页
+                handleSizeChange: function (size) {
+                    this.pageSize = size
+                    this.fill()
+                },
+                handleCurrentChange: function (page) {
+                    this.currentPage = page
+                    this.fill()
+                },
+                zhuan(row) {
+                    sessionStorage.setItem("uid", row.StandardId)
+                    window.location.href = '../Salaryscale/ReviewUpdate';
+                }
+            },
+            mounted: function () {
+                this.fill()
+            }
+        })
+    </script>
+</body>
+</html>

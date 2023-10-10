@@ -1,0 +1,174 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>MCliebin</title>
+</head>
+<body>
+    <div id="app">
+        <template>
+            <el-table :data="tableData"
+                      border
+                      style="width: 100%">
+                <el-table-column fixed
+                                 prop="FirstKindName"
+                                 label="I级机构"
+                                 width="120">
+                </el-table-column>
+                <el-table-column prop="SecondKindName"
+                                 label="II级机构"
+                                 width="120">
+                </el-table-column>
+                <el-table-column prop="ThirdKindName"
+                                 label="Ⅲ级机构"
+                                 width="120">
+                </el-table-column>
+                <el-table-column prop="SalaryStandardName"
+                                 label="薪酬标准"
+                                 width="120">
+                </el-table-column>
+                <el-table-column prop="HumanName"
+                                 label="姓名"
+                                 width="120">
+                </el-table-column>
+                 <el-table-column label="查看">
+                <template slot-scope="scope">
+                    <el-button type="primary" size="small" v-on:click="handleClick(scope.row.HumanId)">查看</el-button>
+
+                </template>
+                </el-table>
+        </template>
+        <el-pagination v-on:size-change="handleSizeChange"
+                       v-on:current-change="handleCurrentChange"
+                       :currentpage="currentPage"
+                       :page-sizes="[3, 6, 9, 12]"
+                       :page-size="pageSize"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="rows">
+        </el-pagination>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                currentPage: 1,
+                pageSize: 3,
+                rows: 1,
+                yi: "",
+                er: "",
+                san: "",
+                fl: "",
+                mc:"",
+            }, methods: {
+            handleSizeChange: function (size) {
+                this.currentPage = 1;
+                this.pageSize = size;
+            },
+            handleCurrentChange: function (page) {
+                this.currentPage = page;
+                this.fill();
+                }, handleClick(id) {
+                sessionStorage.setItem("Nid", id)
+                window.location = "/Mobilize/MCdjick";
+                },
+                fill() {
+                var yii = "'" + sessionStorage.getItem("yi") + "'";
+                var eri = "'" + sessionStorage.getItem("er") + "'";
+                var sani = "'" + sessionStorage.getItem("san")+ "'";
+                var fli = "'" + sessionStorage.getItem("fl") + "'";
+                var mci = "'" + sessionStorage.getItem("mc") + "'";
+                   // console.log(this.CheckStatus);
+                        if (yii != "'undefined'" && eri != "'undefined'" && sani != "'undefined'" && fli != "'undefined'" && mci == "'undefined'") {
+                            axios.get('../Mobilize/MCshiData', {
+                                params: {
+                                    CurrentPage: this.currentPage,
+                                    PageSize: this.pageSize,
+                                    Where: "FirstKindName=" + yii + "and SecondKindName=" + eri + "and ThirdKindName=" + snai + "and MajorKindName=" + fli
+                                }
+                            }).then(res => {
+                                console.log(res.data);
+                                this.tableData = res.data.List;
+                                this.rows = res.data.Rows;
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                        } else if (yii != "'undefined'" && eri != "'undefined'" && sani != "'undefined'") {
+                            axios.get('../Mobilize/MCshiData', {
+                                params: {
+                                    CurrentPage: this.currentPage,
+                                    PageSize: this.pageSize,
+                                    Where: "FirstKindName=" + yii + "and SecondKindName=" + eri + "and ThirdKindName=" + sani
+                                }
+                            }).then(res => {
+                                console.log(res.data);
+                                this.tableData = res.data.List;
+                                this.rows = res.data.Rows;
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                        } else if (yii != "'undefined'" && eri != "'undefined'" && sani == "'undefined'" && fli == "'undefined'" && mci == "'undefined'") {
+                            axios.get('../Mobilize/MCshiData', {
+                                params: {
+                                    CurrentPage: this.currentPage,
+                                    PageSize: this.pageSize,
+                                    Where: "FirstKindName=" + yii + "and SecondKindName=" + eri
+                                }
+                            }).then(res => {
+                                console.log(res.data);
+                                this.tableData = res.data.List;
+                                this.rows = res.data.Rows;
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                        } else if (yii != "'undefined'" && eri == "'undefined'" && sani == "'undefined'" && fli == "'undefined'" && mci == "'undefined'") {
+                            axios.get('../Mobilize/MCshiData', {
+                                params: {
+                                    CurrentPage: this.currentPage,
+                                    PageSize: this.pageSize,
+                                    Where: "FirstKindName=" + yii
+                                }
+                            }).then(res => {
+                                console.log(res.data);
+                                this.tableData = res.data.List;
+                                this.rows = res.data.Rows;
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                        } else if (yii != "'undefined'" && eri != "'undefined'" && sani != "'undefined'" && fli != "'undefined'" && mci != "'undefined'") {
+                            axios.get('../Mobilize/MCshiData', {
+                                params: {
+                                    CurrentPage: this.currentPage,
+                                    PageSize: this.pageSize,
+                                    Where: "FirstKindName=" + yii + "and SecondKindName=" + eri + "and ThirdKindName=" + sani + "and MajorKindName=" + fli + "and MajorName=" + mci
+                                }
+                            }).then(res => {
+                                console.log(res.data);
+                                this.tableData = res.data.List;
+                                this.rows = res.data.Rows;
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                     }
+                }
+             },
+            mounted: function () {
+                this.fill();
+            }
+
+        })
+    </script>
+</body>
+</html>

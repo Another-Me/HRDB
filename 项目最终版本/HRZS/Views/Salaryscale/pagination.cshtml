@@ -1,0 +1,119 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>薪酬标准查询跳转的分页</title>
+</head>
+<body>
+    <div id="app">
+        <el-table :data="tableData"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="StandardId"
+                             label="薪酬标准编号"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="StandardName"
+                             label="薪酬标准名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="Designer"
+                             label="制定人">
+            </el-table-column>
+            <el-table-column prop="RegistTime"
+                             label="登记时间">
+            </el-table-column>
+            <el-table-column prop="SalarySum"
+                             label="薪酬总额 ">
+            </el-table-column>
+        </el-table>
+        <el-pagination v-on:size-change="handleSizeChange"
+                       v-on:current-change="handleCurrentChange"
+                       :current-page="currentPage"
+                       :page-sizes="[3, 6, 9, 12]"
+                       :page-size="pageSize"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="rows">
+        </el-pagination>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                currentPage: 1,
+                pageSize: 3,
+                rows: 1,
+                StandardId: '',
+                StandardName: '',
+                input: '',
+                time: ''
+            },
+            methods: {
+                //窗体加载
+                fill() {
+                    this.StandardId = sessionStorage.getItem("StandardId")
+                    this.StandardName =sessionStorage.getItem("StandardName", this.StandardName)
+                    this.input =sessionStorage.getItem("input")
+                    this.time = sessionStorage.getItem("time")
+                    //console.log("编号：" + this.StandardId);
+                    //console.log("关键字：" + this.StandardName);
+                    //console.log("时间：" + this.input + "至" + this.time);
+                    var condition="1=1"
+                    if (this.StandardId != "" ) {
+                        condition += " and StandardId like '%" + this.StandardId+"%'"
+                    }
+                    if (this.StandardName != "" ) {
+                        condition += " and Designer like '%" + this.StandardName + "%'"
+                    }
+                    if (this.input != "") {
+                        condition += " and RegistTime>='" + this.input + "' and RegistTime<='" + this.time+"'"
+                    }
+                    console.log(condition);
+                    axios.get('/Salaryscale/UsersRoleFenye', {
+                        params: {
+                            CurrentPage: this.currentPage,
+                            PageSize: this.pageSize,
+                            condition:condition
+                        }
+                    })
+                        .then(res => {
+                            this.tableData = res.data.List
+                            this.rows = res.data.Rows
+                            //console.log(res.data.List);
+                            //console.log(res.data.Rows);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //换页
+                handleSizeChange: function (size) {
+                    this.pageSize = size
+                    this.fill()
+                },
+                handleCurrentChange: function (page) {
+                    this.currentPage = page
+                    this.fill()
+                },
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+            },
+        })
+    </script>
+</body>
+</html>

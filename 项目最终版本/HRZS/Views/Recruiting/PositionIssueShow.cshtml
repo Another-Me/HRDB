@@ -1,0 +1,296 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>PositionIssueShow</title>
+</head>
+<body>
+    <div id="app">
+        <form name="humanfileForm" method="post" action="position_change_update.html">
+            <table width="100%">
+                <tr>
+                    <td>
+                        <font color="black">您正在做的业务是：人力资源--招聘管理--职位发布管理--职位发布登记 </font>
+                    </td>
+                </tr>
+            </table>
+            <el-form :model="AddForm" :rules="rules" ref="AddForm" label-width="100px" class="demo-ruleForm">
+                <el-form-item>
+                    <el-col :span="6">
+                        <el-form-item label="机构" prop="selectedKey">
+                            <el-cascader v-model="selectedKey" :options="parentCateList" :props="cascaderProps" v-on:change="parentCateChanged"
+                                         ref="casc"
+                                         :style="{width: '100%'}" placeholder="请选择级联选择" clearable></el-cascader>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="招聘类型" prop="EngageType">
+                            <el-select v-model="AddForm.EngageType" placeholder="请选择活动区域">
+                                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="6">
+                        <el-form-item label="职位" prop="selectedKeysTwo">
+                            <el-cascader v-model="selectedKeysTwo" :options="parentCateListTwo" :props="cascaderPropsTwo" v-on:change="parentCateChangedTwo"
+                                         ref="cascT"
+                                         :style="{width: '100%'}" placeholder="请选择职位" clearable></el-cascader>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="招聘人数" prop="HumanAmount">
+                            <el-input v-model="AddForm.HumanAmount"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="截止日期" prop="Deadline">
+                            <el-date-picker v-model="AddForm.Deadline"
+                                            type="date"
+                                            placeholder="选择日期" format="yyyy-MM-dd" value-format="yyyy-MM-dd">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="10">
+                        <el-form-item label="登记人" prop="Register">
+                            <el-input v-model="AddForm.Register"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    @*<el-col class="line" :span="2"></el-col>*@
+                    <el-col :span="10">
+                        <el-form-item label="登记时间" prop="RegistTime">
+                            <el-input v-model="AddForm.RegistTime" width="20px" id="nowTime" readonly="readonly"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="职位描述" prop="MajorDescribe">
+                    <el-input type="textarea" :rows="5" :col="10" v-model="AddForm.MajorDescribe"></el-input>
+                </el-form-item>
+                <el-form-item label="招聘要求" prop="EngageRequired">
+                    <el-input type="textarea" :rows="5" :col="10" v-model="AddForm.EngageRequired"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" v-on:click="submitForm('AddForm')" size="small">提交</el-button>
+                    <el-button v-on:click="save()" size="small">清除</el-button>
+                </el-form-item>
+            </el-form>
+        </form>
+    </div>
+    <script type="text/javascript">
+	window.onload = this.check;
+	var vm = new Vue({
+		el: "#app",
+		data: {
+			
+
+			AddForm: {
+				FirstKindId: "",
+				FirstKindName: "",
+				SecondKindId: "",
+				SecondKindName: "",
+				ThirdKindId: "",
+				ThirdKindName: "",
+				MajorId: "",
+				MajorName: "",
+				HumanAmount: "",
+				EngageType: "",
+				Deadline: "",
+				Register: "",
+				RegistTime: "",
+				MajorDescribe: "",
+				EngageRequired: "",
+				MajorKindId: "",
+				MajorKindName: ""
+			},
+			rules: {
+                EngageType: [{ required: true, message: '请选招聘类型', trigger: 'blur' }],
+           /*     selectedKey: [{
+                    required: true, message: '请选机构', trigger: 'blur' },
+				],
+                selectedKeysTwo: [{
+                    required: true, message: '请选职位', trigger: 'blur'
+                },
+                ],*/
+				HumanAmount: [
+					{ required: true, message: '请输入招聘人数', trigger: 'blur' },
+				],
+				Deadline: [
+					{ required: true, message: '请输入截止日期', trigger: 'blur' },
+				],
+				Register: [
+					{ required: true, message: '请输入登记人', trigger: 'blur' },
+				],
+				RegistTime: [
+					{ required: true, message: '请输入登记时间', trigger: 'blur' },
+				],
+				MajorDescribe: [
+					{ required: true, message: '请输入职位描述', trigger: 'blur' },
+				],
+				EngageRequired: [
+					{ required: true, message: '请输入招聘要求', trigger: 'blur' },
+				],
+			},
+			selectedKeysTwo: [],
+			selectedKey: [],
+			parentCateList: [],
+			parentCateListTwo: [],
+			sv:[],
+			sz:[],
+			cascaderProps: {
+                label: 'FirstKindName',
+                value: 'FirstKindId',
+                children: 'Chlidren'
+			},
+			cascaderPropsTwo: {
+                label: 'MajorKindName',
+                value: 'MajorKindId',
+                children: 'Chlidren'
+			},
+			options: [{
+				value: '校园招聘',
+				label: '校园招聘'
+			},
+			{
+				value: '社会招聘',
+				label: '社会招聘'
+			}],
+		},
+		methods: {
+		
+			//级联下拉框选择改变事件
+			parentCateChanged: function () {
+				console.info(this.selectedKey.length);
+				if (this.selectedKey.length > 0) {
+					this.sz = this.$refs["casc"].getCheckedNodes()[0].pathLabels;
+				}
+			},
+			//级联下拉框选择改变事件
+			parentCateChangedTwo: function () {
+				console.info(this.selectedKeysTwo.length);
+				if (this.selectedKeysTwo.length > 0) {
+					this.sv = this.$refs["cascT"].getCheckedNodes()[0].pathLabels;
+				}
+			},
+			save() {
+				this.$refs["AddForm"].resetFields();
+			},
+			//级联下拉框查询
+			jilian: function () {
+                axios.get("/ArchiveRegistration/CascadeAsync").then((res) => {
+					this.parentCateList = res.data;
+				}).catch(err => {
+					console.info(err);
+				})
+                axios.get('/ArchiveRegistration/ZhiWeiCascadeAsync').then((res) => {
+					this.parentCateListTwo = res.data;
+				}).catch(err => {
+					console.info(err);
+				})
+			},
+			tick: function () {
+				var d = new Date();
+				var y = d.getFullYear();
+				var moth = d.getMonth() + 1;
+				var date = d.getDate();
+				var h = d.getHours();
+				var m = d.getMinutes();
+				var s = d.getSeconds();
+				var hh = 20 - 1 - h;
+				var mm = 60 - 1 - m;
+				var ss = 60 - s;
+				if (hh > 0) {
+					mm = mm + 60 * hh;
+				}
+				if (moth < 10) {
+					moth = "0" + moth;
+				}
+				if (date < 10) {
+					date = "0" + date;
+				}
+				if (h < 10) {
+					h = "0" + h;
+				}
+				if (m < 10) {
+					m = "0" + m;
+				}
+				if (s < 10) {
+					s = "0" + s;
+				}
+				if (mm < 10) {
+					mm = "0" + mm;
+				}
+				if (ss < 10) {
+					ss = "0" + ss;
+				}
+				this.AddForm.RegistTime = y + "-" + moth + "-" + date + " " + h + ":" + m + ":" + s;
+			},
+			check: function () {
+				//获得系统当前时间的方法
+				this.tick();
+			},
+            submitForm: function (formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.Add();
+                    } else {
+                        console.info('err submit');
+                        return false;
+                    }
+                })
+
+            },
+			Add: function () {
+				var t = this;
+				t.AddForm.FirstKindId = t.selectedKey[0];
+				t.AddForm.FirstKindName = t.sz[0];
+				t.AddForm.SecondKindId = t.selectedKey[1];
+				t.AddForm.SecondKindName = t.sz[1];
+				t.AddForm.ThirdKindId = t.selectedKey[2];
+				t.AddForm.ThirdKindName = t.sz[2];
+                t.AddForm.MajorKindId = t.selectedKeysTwo[0];
+                t.AddForm.MajorKindName = t.sv[0];
+                t.AddForm.MajorId = t.selectedKeysTwo[1];
+                t.AddForm.MajorName = t.sv[1];
+                axios.get('/Recruiting/InsertEMR', {
+					params:
+						t.AddForm
+				}).then(res => {
+					if (res.data > 0) {
+						alert("添加成功");
+                        window.location.href = '/Recruiting/PositionShow';
+						t.save();
+					} else {
+						alert("添加失败");
+						return;
+					}
+				}).catch(err => {
+					console.info(err);
+					return;
+				})
+			}
+		},
+		mounted: function () {
+			this.jilian();
+			this.check();
+			window.onload = this.tick;
+			var out = window.setInterval(this.tick, 1000);
+            this.AddForm.Register = localStorage.getItem("username");
+		}
+	})
+    </script>
+</body>
+</html>

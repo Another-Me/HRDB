@@ -1,0 +1,101 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>Cmkshi</title>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>您正在做的业务是：人力资源--客户化设置--人力资源档案管理设置--职称设置  </el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <div>
+
+                <el-table :data="tablelist"
+                          style="width: 100%"
+                          :cell-style="{'text-align':'center'}" :header-cell-style="{'text-align':'center'}">
+                    <el-table-column prop="MajorKindName"
+                                     label="职位名称">
+                       
+                    </el-table-column>
+                    <el-table-column label="操作">
+                        <template slot-scope="scope">
+                            <el-button type="primary" size="small" v-on:click="dlet(scope.row.MfkId)">删除</el-button>
+
+                        </template>
+                </el-table>
+                <el-pagination v-on:size-change="handleSizeChange"
+                               v-on:current-change="handleCurrentChange"
+                               :currentpage="currentPage"
+                               :page-sizes="[3, 6, 9, 12]"
+                               :page-size="pageSize"
+                               layout="total, sizes, prev, pager, next, jumper"
+                               :total="rows">
+                </el-pagination>
+            </div>
+        </el-card>
+
+    </div>
+
+    <script type="text/javascript">
+         var vm=new Vue({
+             el:"#app",
+             data:{
+                 tablelist:[],
+                 currentPage: 1,
+                 pageSize: 3,
+                 rows: 1,
+                 a:"0"
+
+             },
+             methods:{
+
+                 fill: function(){
+                     axios.get('/Customization/CmkshiData',{
+                         params:{
+                             CurrentPage: this.currentPage,
+                             PageSize:this.pageSize
+                         }
+                     }).then(res=>{
+                       this.tablelist = res.data.List;
+                       this.rows = res.data.Rows;
+                     }).catch(err=>{
+                         console.log(err);
+                     })
+                 },
+               handleSizeChange: function (size) {
+                            this.currentPage=1;
+                            this.pageSize=size;
+                        },
+                        handleCurrentChange: function (page) {
+                            this.currentPage=page;
+                            this.fill();
+                        },  dlet: function (row) {
+                    if (confirm("是否删除该信息") == true) {
+                        window.location.href = "/Customization/Deletezhu/" + row;
+                    }
+                 },
+               },
+                   mounted() {
+                   this.fill();
+          }
+    })
+    </script>
+</body>
+</html>

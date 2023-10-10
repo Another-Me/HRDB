@@ -1,0 +1,423 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>MCDDSelect</title>
+</head>
+<body>
+    <div id="app">
+        <form action="register_success.html">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <font color="#0000CC">您正在做的业务是:人力资源--调动管理--调动登记</font>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">
+                            <input type="button" value="提交" class="BUTTON_STYLE1"
+                                   v-on:click="mySubmit()">
+                            <input type="button" class="BUTTON_STYLE1"
+                                   onclick="javascript:window.history.back();" value="返回">
+                        </td>
+                    </tr>
+                </table>
+                <table width="100%" border="1" cellpadding=0 cellspacing=1
+                       bordercolorlight=#848284 bordercolordark=#eeeeee>
+                    <tr height="21">
+                        <td width="8%">
+                            档案编号
+                        </td>
+                        <td width="10%">
+                            <input type="text" prop="humanId" v-model="humanId" readonly="readonly"
+                                   value="" class="INPUT_STYLE2">
+
+                        </td>
+                        <td width="8%">
+                            姓名
+                        </td>
+                        <td width="10%">
+                            <input type="text" prop="humanName" v-model="humanName"
+                                   value="">
+                        </td>
+                    </tr>
+                    <tr>
+
+                        <td width="8%">
+                            原一级机构
+                        </td>
+                        <td>
+                            <input type="text" prop="FirstKindName" v-model="FirstKindName"
+                                   value="" readonly="readonly">
+                            <input type="hidden" name="majorChange.firstKindId">
+                        </td>
+                        <td class="TD_STYLE1" width="8%">
+                            原二级机构
+                        </td>
+                        <td width="10%">
+                            <input type="text" prop="SecondKindName" v-model="SecondKindName"
+                                   value="" readonly="readonly">
+                            <input type="hidden" name="secondKindId">
+                        </td>
+                        <td width="8%">
+                            原三级机构
+                        </td>
+                        <td width="10%">
+                            <input type="text" prop="ThirdKindName" v-model="ThirdKindName"
+                                   value="" readonly="readonly">
+                            <input type="hidden" name="thirdKindId">
+                        </td>
+                        <td width="8%">
+                        </td>
+                        <td width="10%">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            原职位分类
+                        </td>
+                        <td>
+                            <input type="text" prop="MajorKindName" v-model="MajorKindName"
+                                   value="" readonly="readonly"
+                                   class="INPUT_STYLE2">
+                            <input type="hidden" name="majorKindId" value="02">
+                        </td>
+                        <td class="TD_STYLE1" width="12%">
+                            原职位名称
+                        </td>
+                        <td>
+                            <input type="text" prop="MajorName" v-model="MajorName"
+                                   readonly="readonly">
+                            <input type="hidden" name="majorId" value="02">
+                        </td>
+                        <td>
+                            原薪酬标准
+                        </td>
+                        <td>
+                            <input type="text" prop="SalaryStandardName" v-model="SalaryStandardName"
+                                   value=""
+                                   readonly="readonly">
+                            <input type="hidden" name="salaryStandardId" value="1353320082662">
+                        </td>
+                        <td>
+                            原薪酬总额
+                        </td>
+                        <td>
+                            <input type="text" prop="SalarySum" v-model="SalarySum"
+                                   value="" readonly="readonly"
+                                   class="INPUT_STYLE2">
+                        </td>
+                    </tr>
+                    @*级联*@
+                    <tr>
+                        <td>
+                            新机构名称
+                        </td>
+                        <td width="180">
+                            <el-cascader v-model="value1"
+                                         :options="options"
+                                         :props="b"
+                                         ref="refs"
+                                         v-on:change="handleChange"></el-cascader>
+                        </td>
+                    </tr>
+                    @*级联*@
+                    <tr>
+                        <td>
+                            新职位分类
+                        </td>
+                        <td>
+                            <el-cascader v-model="value"
+                                         :options="options2"
+                                         :props="n"
+                                         ref="refs1"
+                                         v-on:change="handleChange1"></el-cascader>
+                        </td>
+                        <td>
+                            新薪酬标准
+                        </td>
+                        <td>
+                            <el-select ref="operateName2" width="160" v-model="Xinc" v-on:change="chang" placeholder="请选择">
+                                <el-option v-for="item in options1"
+                                           :key="item.StandardId"
+                                           :change="aa"
+                                           :label="item.StandardName"
+                                           :value="{a:item.SalarySum,b:item.StandardName,c:item.StandardId}"
+                                           >
+                                </el-option>
+                            </el-select>
+                        </td>
+                        <td class="TD_STYLE1">
+                            新薪酬总额
+                        </td>
+                        <td>
+                            <input type="text" prop="NewSalarySum" v-model="NewSalarySum" name="newSalarySum" readonly="readonly"
+                                   value="0.00">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            登记人
+                        </td>
+                        <td>
+                            <input type="text" prop="Register" v-model="Register" readonly="readonly" value="better_admin"
+                                   class="INPUT_STYLE2">
+                        </td>
+                        <td>
+                            登记时间
+                        </td>
+                        <td>
+                            <el-date-picker v-model="RegistTime"
+                                            type="date"
+                                            placeholder="选择日期">
+                            </el-date-picker>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            调动原因
+                        </td>
+                        <td colspan="7" >
+                            <textarea prope="ChangeReason" v-model="ChangeReason" rows="6" ></textarea>
+                        </td>
+                    </tr>
+                </table>
+        </form>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                a1: "",
+                a2: "",
+                a3:"",
+                item: [],
+                majorChange: [],
+
+                MchId: '',
+                humanId: "",
+                humanName: "",
+                FirstKindName: "",
+                SecondKindName: "",
+                ThirdKindName: "",
+                MajorKindName: "",
+                MajorName: "",
+                SalaryStandardName: "",
+                SalarySum: "",
+                NewFirstKindName:"",
+                NewSecondKindName:"",
+                NewThirdKindName: "", 
+                Register: "",
+                NewMajorKindName: "",
+                NewMajorName: "",
+                NewSalaryStandardName: "",
+                ChangeReason: "",
+                RegistTime:"",
+                zhiwei: "",
+                zhiMc: "",
+                Xinc: "",
+                NewSalarySum:"",
+                options1: [],
+                id: '',
+                aa: '',
+                cc: '',
+                HumanMajorId: '',
+                NewMajorId:'',
+                //级联
+                
+                value1: [],
+                options: [],
+                value: [],
+                options2:[],
+                label:'',
+                b: {
+                    label: 'FirstKindName', value: 'FirstKindId', children: 'children',
+                },
+                n: {
+                    label: 'MajorKindName', value: 'MajorKindId', children: 'Children',
+                },
+
+            }, methods: {
+                //查询id 并且赋值
+                fill() {    
+                    //传id
+                    this.id = sessionStorage.getItem("Mid");
+                    //console.log(this.id);
+                    axios.get('/Mobilize/MCidSelect', {
+                        params: {
+                            id: this.id
+                        }
+                    })
+                        .then(res => {
+                            //赋值
+                            this.majorChange=res.data
+                            console.log(res.data);
+                            this.humanId = res.data.HumanId
+                            this.humanName = res.data.HumanName
+
+                            this.FirstKindName = res.data.FirstKindName
+                            this.SecondKindName = res.data.SecondKindName
+                            this.ThirdKindName = res.data.ThirdKindName
+
+                            this.MajorKindName = res.data.HumanMajorKindName
+                            this.MajorName = res.data.HunmaMajorName
+                            this.SalaryStandardName = res.data.SalaryStandardName
+                            this.SalarySum = res.data.SalarySum
+                            this.NewFirstKindName= res.data.NewFirstKindName
+                            this.NewSecondKindName=res.data.NewSecondKindName
+                            this.NewThirdKindName = res.data.NewThirdKindName
+                            this.Register = res.data.Register
+
+                            this.HumanMajorKindName = res.data.NewMajorKindName
+                            this.HunmaMajorName = res.data.NewMajorName
+                            this.NewSalaryStandardName = res.data.NewSalaryStandardName
+                            this.NewSalarySum = res.data.NewSalarySum
+                            this.ChangeReason = res.data.ChangeReason
+                            this.RegistTime = res.data.RegistTime
+                            console.log(this.humanId);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                mySubmit() {
+                    axios.post('/Mobilize/MCInsert', {
+                        FirstKindId: this.majorChange.FirstKindId,
+                        FirstKindName: this.FirstKindName,
+                        SecondKindId: this.majorChange.SecondKindId,
+                        SecondKindName: this.SecondKindName,
+                        ThirdKindId: this.majorChange.ThirdKindId,
+                        ThirdKindName: this.ThirdKindName,
+                        MajorKindId: this.majorChange.HumanMajorKindId,
+                        MajorKindName: this.MajorKindName,
+                        MajorId: this.majorChange.HumanMajorId,
+                        MajorName: this.MajorName,
+                        NewFirstKindId: this.NewFirstKindId,
+                        NewFirstKindName: this.NewFirstKindName ,
+                        NewSecondKindId: this.NewSecondKindId,
+                        NewSecondKindName: this.NewSecondKindName,
+                        NewThirdKindId: this.NewThirdKindId,
+                        NewThirdkindName: this.NewThirdkindName,
+                        NewMajorKindId: this.HumanMajorId,
+                        NewMajorKindName: this.cc ,
+                        NewMajorId: this.NewMajorId,
+                        NewMajorName: this.aa, 
+                        HumanId: this.id,
+                        HumanName: this.humanName,
+                        SalaryStandardId: this.majorChange.SalaryStandardId,
+                        SalaryStandardName: this.SalaryStandardName,
+                        SalarySum: this.SalarySum,
+                        NewSalaryStandardId: this.a1,
+                        NewSalaryStandardName: this.a2,
+                        NewSalarySum: this.a3,
+                        ChangeReason: this.ChangeReason,
+                        Register: this.Register,
+                        RegistTime: this.RegistTime
+                    }).then(res => {
+                    if (res.data > 0) {
+                        alert("提交成功")
+                        window.location.href = '../Mobilize/McHomepagez';
+                    } else {
+                        alert("提交失败")
+                    }
+                })
+                    .catch(err => {
+                        console.log(err);
+                    })
+                },
+                //三级级联
+                fnll() {
+                    axios.get('/Mobilize/MCjil')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.options = res.data
+                           
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                
+                frll() {
+                    axios.get('/Mobilize/CMerjin')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.options2 = res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                finl() {  //查询下拉列表
+                    axios.get('/Mobilize/HFDcSelect')
+                        .then(res => {
+                            //console.log("值"+res.data);
+                            this.options1 = res.data
+                        })
+                        .catch(err => {
+                            //console.log(err)
+                        })
+                },
+                chang(value) {
+                    this.NewSalarySum = value.a
+                    this.a1 = value.c
+                    this.a2 = value.b
+                    this.a3 = value.a
+                    //console.log("hah"+value);
+                },
+                //并联赋值
+                handleChange(value) {
+                    const a = [];
+                    const b = [];
+                    const arr = this.$refs["refs"].getCheckedNodes()[0].pathNodes;
+                    arr.forEach((i) => {
+                        a.push(i.label);
+                        b.push(i.value);
+                    })
+                    this.NewFirstKindId = b[0];
+                    this.NewFirstKindName = a[0];
+                    this.NewSecondKindName = a[1];
+                    this.NewSecondKindId = b[1];
+                    this.NewThirdKindId = b[2];
+                    this.NewThirdKindName = a[2];
+                    
+                },
+                handleChange1(value1) {
+                    const areaText1 = [];
+                    const areaText2 = [];
+                    const arr = this.$refs["refs1"].getCheckedNodes()[0].pathNodes;
+                    arr.forEach((i) => {
+                        areaText1.push(i.label);
+                        areaText2.push(i.value);
+                    });
+                    this.HumanMajorId = areaText2[0]
+                    this.cc = areaText1[0];
+                    this.NewMajorId = areaText2[1]
+                    this.aa = areaText1[1];
+                    //console.log(aa);
+                }
+            },
+            mounted: function () {
+                this.fill();
+                this.fnll();
+                this.frll();
+                this.finl();
+            },
+        }) 
+    </script>
+</body>
+</html>

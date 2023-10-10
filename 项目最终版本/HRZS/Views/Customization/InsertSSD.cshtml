@@ -1,0 +1,33 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>InsertSSD</title>
+</head>
+<body>
+    <div>
+        <div slot="header" class="clearfix">
+            <el-breadcrumb separator="/">
+                <el-breadcrumb-item>您正在做的业务是：人力资源--客户化设置--薪酬管理设置--薪酬项目设置--添加 </el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
+        <form action="/Customization/InsertzhuSSD" method="post">
+            薪酬项目名称:<input id="Text1" name="ItemName" type="text" /><br />
+            <input id="Submit1" type="submit" value="添加" />
+            <input type="button" value="返回" onclick="window.location='/Customization/InsertzhuSSD'">
+        </form>
+    </div>
+</body>
+</html>

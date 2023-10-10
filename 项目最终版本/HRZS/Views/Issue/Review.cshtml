@@ -1,0 +1,81 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>薪酬登记发放审核</title>
+</head>
+<body>
+    <div id="app">
+        <el-table :data="tableData"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="SalaryGrantId"
+                             label="薪酬发放编号">
+            </el-table-column>
+            <el-table-column prop="FirstKindName"
+                             label="一级机构">
+            </el-table-column>
+            <el-table-column prop="SecondKindName"
+                             label="二级机构">
+            </el-table-column>
+            <el-table-column prop="ThirdKindName"
+                             label="三级机构">
+            </el-table-column>
+            <el-table-column prop="HumanAmount"
+                             label="人数">
+            </el-table-column>
+            <el-table-column prop="jine"
+                             label="基本薪酬总额">
+            </el-table-column>
+            <el-table-column label="复核">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle v-on:click="dengji(scope.row)"></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+            },
+            methods: {
+                //窗体加载
+                fill() {
+                    axios.get('/Issue/SGSelect')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.tableData = res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //跳转页面
+                dengji(name) {
+                    sessionStorage.setItem("SalaryStandardId", name.SalaryStandardId)
+                    console.log(name.SalaryStandardId);
+                    window.location.href = '../Issue/ReviewUpdate';
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+            },
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Main</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <style>
+        .el-header, .el-footer {
+            background-color: #B3C0D1;
+            color: #333;
+            text-align: center;
+            line-height: 60px;
+        }
+
+        .el-aside {
+            background-color: #D3DCE6;
+            color: #333;
+            line-height: 200px;
+        }
+
+        .el-main {
+            background-color: #fff1c4;
+            color: #333;
+            text-align: center;
+            /*line-height: 160px;*/
+        }
+
+        body > .el-container {
+            margin-bottom: 40px;
+        }
+
+        .el-container:nth-child(5) .el-aside,
+        .el-container:nth-child(6) .el-aside {
+            line-height: 260px;
+        }
+
+        .el-container:nth-child(7) .el-aside {
+            line-height: 320px;
+        }
+
+        .z {
+            font-size: 40px;
+            margin: 0;
+            color: white;
+            filter: progid:DXImageTransform.Microsoft.Shadow(color=black,direction=120,strength=5);
+            text-shadow: 4px 4px 15px black;
+            line-height: 85px
+        }
+
+        .t {
+            background-color: #FFD553;
+        }
+
+        .c {
+            height: 860px;
+            background-color: #FFFFCC;
+        }
+
+        .s {
+            background-color: #FFFFCC;
+        }
+
+        #z {
+            color: black;
+        }
+
+        #z2 {
+            font-size: 13px;
+            color: black;
+            font-weight: 700;
+        }
+
+        #zx {
+            font-size: 12px;
+            color: red;
+            font-weight: 800;
+            margin-left: 30px
+        }
+
+        .el-menu-item, .el-submenu__title {
+            height: 34px;
+            line-height: 33px;
+            margin-left: -13px;
+            list-style: none;
+        }
+
+        .el-menu-item-group__title {
+            padding: 0 0 7px 20px;
+            line-height: normal;
+            font-size: 12px;
+            color: #909399;
+        }
+
+        .el-submenu .el-menu-item {
+            height: 35px;
+            line-height: 41px;
+            padding: 0 45px;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-container>
+            <el-header class="t" height="80px"><h1 class="z">人力资源管理系统</h1></el-header>
+            <el-container>
+                <el-aside width="210px" class="c">
+                    <el-row class="tac">
+                        <el-col :span="12">
+                            <el-menu class="el-menu-vertical-demo"
+                                     :unique-opened="true"
+                                     :collapse="isz"
+                                     :collapse-transition="false"
+                                     :router="true"
+                                     :default-active="apath">
+                                <div class="toggle-button" v-on:click="toggle()">|||</div>
+                                <!--一级菜单-->
+                                <el-submenu :index="item.JuriID + ''"
+                                            v-for="item in list2"
+                                            :key="item.JuriID">
+                                    <template slot="title">
+                                        <!-- 图标 -->
+                                        <i :class="iconobj[item.id]"></i>
+                                        <!-- 文本 -->
+                                        <span>{{ item.JurName }}</span>
+                                    </template>
+                                    <!--二级菜单-->
+                                    <el-menu-item :index="item1.JuriID + ''"
+                                                  v-for="item1 in item.children"
+                                                  :key="item1.JuriID"
+                                                  v-if="item1.children.length==0">
+                                        <template slot="title">
+                                            <!-- 图标 -->
+                                            <i class="el-icon-menu"></i>
+                                            <!-- 文本 -->
+                                            <span v-on:click="ajjgsz(item1.JurAddress)">{{ item1.JurName }}</span>
+                                        </template>
+                                    </el-menu-item>
+                                    <!--2级菜单-->
+                                    <el-submenu :index="item2.JuriID + ''"
+                                                v-for="item2 in item.children"
+                                                v-if="item2.children.length != 0"
+                                                :key="item2.JuriID">
+                                        <!--2级菜单模板-->
+                                        <template slot="title">
+                                            <!--2级菜单的图标-->
+                                            <i :class="iconobj[item.id]"></i>
+                                            <!--2级菜单的文字-->
+                                            <span>{{item2.JurName}}</span>
+                                        </template>
+                                        <el-menu-item :index="item3.JuriID + ''"
+                                                      v-for="item3 in item2.children"
+                                                      :key="item3.JuriID"
+                                                      @@click="ajjgsz(item3.JurAddress)">
+                                            <!--3级菜单模板-->
+                                            <template slot="title">
+                                                <!--3级菜单的图标-->
+                                                <i class="el-icon-menu"></i>
+                                                <!--3级菜单的文字-->
+                                                <span>{{item3.JurName}}</span>
+                                            </template>
+                                        </el-menu-item>
+                                    </el-submenu>
+                                </el-submenu>
+                            </el-menu>
+                        </el-col>
+                    </el-row>
+                </el-aside>
+                <el-main>
+                    <iframe :src=src width="99%" height="99%"></iframe>
+                </el-main>
+
+            </el-container>
+        </el-container>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    src: "/Users/Cs",
+                    uid: 0,
+                    iconobj: {
+                        "1": "iconfont icon-user",
+                        "2": "iconfont icon-tijikongjian",
+                        "3": "iconfont icon-shangpin",
+                        "4": "iconfont icon-danju"
+                    },
+                    // 是否折叠
+                    isz: false,
+                    // 被激活的链接地址
+                    apath: "",
+                    //权限数据
+                    list2: []
+                }
+            },
+            methods: {
+                handleOpen(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                handleClose(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                //跳转 I级机构设置
+                ajjgsz(res) {
+                    this.src = res
+                },
+                //跳转职位设置
+                Go6(res) {
+                    this.src = res
+                    /*window.location.href = '../Customization/PositionSettingShow'*/
+                },
+                //公共属性
+                Go7(res) {
+                    this.src = res
+
+                },
+                tc() {
+                    window.sessionStorage.clear();
+                    //this.$router.push("/Users/LoginShow");
+                },
+                // 点击按钮，切换菜单的折叠与展开
+                toggle() {
+                    this.isz = !this.isz;
+                },
+                // 保存链接的激活状态
+                spath(s) {
+                    this.apath = s;
+                },
+                fill() {
+                    this.uid = sessionStorage.getItem("Uid")
+                    console.log(this.uid);
+                    axios.get('/Users/CsTask', {
+                        params: {
+                            id: this.uid
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data);
+                            this.list2 = res.data;
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                }
+
+            },
+            mounted: function () {
+                this.fill()
+            }
+        })
+    </script>
+    <style scoped>
+        .el-header {
+            background-color: #373d41;
+            display: flex;
+            justify-content: space-between;
+            padding-left: 0;
+            align-items: center;
+            color: #fff;
+            font-size: 20px;
+        }
+
+            .el-header div {
+                display: flex;
+                align-items: center;
+            }
+        .el-col-12 {
+            width: 100%
+        }
+                .el-header div span {
+                    margin-left: 15px;
+                }
+
+        .el-aside {
+            background-color: #333744;
+        }
+
+        .el-main {
+            background-color: #eaedf1;
+        }
+
+        .homecontainer {
+            width: 100%;
+            height: 100%;
+        }
+
+        .iconfont {
+            margin-right: 10px;
+        }
+
+        .toggle-button {
+            background-color: #4A5064;
+            font-size: 10px;
+            text-align: center;
+            color: #fff;
+            line-height: 24px;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+        }
+    </style>
+
+</body>
+</html>

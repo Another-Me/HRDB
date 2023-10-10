@@ -1,0 +1,311 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <style>
+        .TD_STYLE1 {
+            border-width: 1px;
+            padding: 0px 0px 0px 40px;
+        }
+    </style>
+    
+    <title>薪资标准登记</title>
+</head>
+<body>
+    <div id="app">
+        <table width="100%">
+            <tr>
+                <td align="right">
+                    <input type="button" value="提 交" v-on:click="check()" class="BUTTON_STYLE1">
+                    <input type="reset" value="返 回" class="BUTTON_STYLE1">
+                </td>
+            </tr>
+        </table>
+        <table id="stable" width="100%" border="1" cellpadding=0 cellspacing=1
+               bordercolorlight=#848284 bordercolordark=#eeeeee
+               class="TABLE_STYLE1">
+            <tr>
+                <td width="74" class="TD_STYLE1">
+                    薪酬标准编号
+                </td>
+                <td width="168" class="TD_STYLE2">
+                    <el-input v-model="random" :disabled="true" placeholder=""></el-input>
+                </td>
+                <td width="83" class="TD_STYLE1">
+                    薪酬标准名称
+                </td>
+                <td width="171" class="TD_STYLE2">
+                    <el-input v-model="StandardName" placeholder="请输入内容"></el-input>
+                </td>
+                <td width="170" class="TD_STYLE1">
+                    薪酬总额
+                </td>
+                <td width="138" class="TD_STYLE2">
+                    <el-input v-model="jiage" :disabled="true">
+                    </el-input>
+                </td>
+                <td width="103" class="TD_STYLE1">
+                    &nbsp;
+                </td>
+                <td width="95" height="26" class="TD_STYLE2">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    制定人
+                </td>
+                <td class="TD_STYLE2">
+                    <el-select v-model="Designer" placeholder="请选择">
+                        <el-option v-for="item in options"
+                                   :key="item.UTrueName"
+                                   :label="item.UTrueName"
+                                   :value="item.UTrueName">
+                        </el-option>
+                    </el-select>
+                </td> 
+                <td class="TD_STYLE1">
+                    登记人
+                </td>
+                <td class="TD_STYLE2">
+                    <el-select v-model="Register" placeholder="请选择">
+                        <el-option v-for="item in options"
+                                   :key="item.UTrueName"
+                                   :label="item.UTrueName"
+                                   :value="item.UTrueName">
+                        </el-option>
+                    </el-select>
+                </td>
+                <td class="TD_STYLE1">
+                    登记时间
+                </td>
+                <td class="TD_STYLE2">
+                    <div id="real-time-clock"></div>
+                </td>
+                <td class="TD_STYLE1">
+                    &nbsp;
+                </td>
+                <td class="TD_STYLE2">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    备注
+                </td>
+                <td colspan="7" class="TD_STYLE2">
+                    <el-input v-model="Remark" placeholder="请输入内容"></el-input>
+                </td>
+            </tr>
+        </table>
+
+        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" v-on:change="handleCheckAllChange">全选</el-checkbox>
+        <div style="margin: 15px 0;"></div>
+        <el-checkbox-group v-model="checkedCities" v-on:change="handleCheckedCitiesChange">
+            <el-checkbox v-for="(item,i) in cities" :label="item" :key="i">{{item.ItemName}}</el-checkbox>
+        </el-checkbox-group>
+        <el-table :data="tableData" style="width: 100%">
+            <el-table-column prop="ItemId" 
+                             label="序号"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="ItemName"
+                             label="薪酬项目名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="Salary" label="金额">
+                <template slot-scope="scope">
+                    <input type="number" name="hie" v-on:blur="zong()" v-model="scope.row.Salary" />
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <script type="text/javascript">
+        var sj = "";
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                input: 0,
+                timeString: '',
+                checkedCities: [],
+                checkAll: false,
+                cities: [],
+                isIndeterminate: false,
+                ItemId: '',
+                ItemName: '',
+                jiage: 0,
+                Register: '',
+                Designer: '',
+                StandardName: '',
+                random: '',
+                Salary: 0,
+                CheckStatus: '否',
+                Remark: '',
+                options:[]
+            },
+            methods: {
+                fill() {
+                    var name = sessionStorage.getItem("name");
+                    this.Register=name
+                    axios.get('/Salaryscale/SDDSelect')
+                        .then(res => {
+                            /*this.tableData = res.data*/
+                            this.cities = res.data
+                         
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //随机数
+                frll() {
+                    var num = Math.floor(Math.random() * 10000000 + 9999999);
+                    this.random=num
+                },
+                //下拉框
+                fell() {
+                    axios.get('/Salaryscale/StandardSelectUser')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.options=res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //提交事件
+                check() {
+                    console.log(sj + "---------");
+                    console.log(this.tableData);
+                    for (var i in this.tableData)
+                    {
+                        /*console.log(this.tableData[i].ItemId);*/
+                        axios.post('/Salaryscale/SSDInsert',{
+                            StandardId: this.random,
+                            StandardName: this.StandardName,
+                            ItemId: this.tableData[i].ItemId,
+                            ItemName: this.tableData[i].ItemName,
+                            Salary: this.tableData[i].Salary
+                        })
+                            .then(res => {
+                                if (res.data > 0) {
+                                    //alert("增加成功")
+                                } else {
+                                    alert("增加失败");
+                                }
+                            })
+                            .catch(err => {
+                                alert("薪酬标准单详细信息表增加失败")
+                                console.log(err);
+                            })
+                    }
+                    this.essential()
+                },
+                essential() {
+                    axios.post('/Salaryscale/SSInsertAsync', {
+                        StandardId: this.random,
+                        StandardName: this.StandardName,
+                        Designer: this.Designer,
+                        Register: this.Register,
+                        RegistTime: sj,
+                        SalarySum: this.jiage,
+                        CheckStatus: this.CheckStatus,
+                        Remark: this.Remark
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                alert("增加成功")
+                                window.location = "/Salaryscale/Review";
+                            } else {
+                                alert("增加失败");
+                            }
+                        })
+                        .catch(err => {
+                            alert("薪酬标准基本信息表增加失败")
+                            console.log(err);
+                        })
+                },
+                //全部选中
+                handleCheckAllChange(val) {
+                    this.checkedCities = val ? this.cities : [];
+                    this.isIndeterminate = false
+                    this.tableData = this.checkedCities;
+                    //console.log(this.tableData.length);
+                },
+                //单独选中
+                handleCheckedCitiesChange(value) {
+                    let checkedCount = value.length;
+                    this.checkAll = checkedCount === this.cities.length;
+                    this.isIndeterminate = checkedCount > 0 && checkedCount < this.cities.length;
+                    this.tableData = value;
+                },
+
+                //总金额
+                zong() {
+                    var zong = 0;
+                    const inputs = document.getElementsByName("hie");
+                    //console.log(inputs);
+                    inputs.forEach((input) => {
+                        //console.log(input);
+                        zong += parseFloat(input.value) || 0;
+                    })
+                    //console.log(zong);
+                    this.jiage = zong;
+                    //console.log(this.jiage);
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill();
+                this.frll()
+                this.fell()
+              // setInterval(this.updateClock(), 1000);
+            },
+        })
+        function updateClock() {
+            //获取时间
+            var currentTime = new Date();
+
+
+            //获取年月日
+            var year = currentTime.getFullYear();
+            var month = currentTime.getMonth()+1;
+            var day = currentTime.getDate();
+
+            //获取时分秒
+            var hours = currentTime.getHours();
+            var minutes = currentTime.getMinutes();
+            var seconds = currentTime.getSeconds();
+
+            // 添加前导零，确保时间始终以两位数显示
+            hours = (hours < 10 ? "0" : "") + hours;
+            minutes = (minutes < 10 ? "0" : "") + minutes;
+            seconds = (seconds < 10 ? "0" : "") + seconds;
+
+            // 构建时间字符串
+            var timeString = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+
+            //连接到div，更新页面上显示时间的元素
+            document.getElementById("real-time-clock").innerHTML = timeString;
+
+            //赋值
+            this.sj = timeString;
+        }
+        // 每秒钟调用一次updateClock函数
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>

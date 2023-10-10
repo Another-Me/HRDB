@@ -1,0 +1,127 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>InterviewScreen</title>
+</head>
+<body>
+    <div id="app">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>您正在做的业务是：人力资源--招聘管理--面试管理--面试筛选--面试结果列表 </el-breadcrumb-item>
+                </el-breadcrumb>
+                <el-breadcrumb separator="/" >
+                    <div align="right">
+                        <input type="button" value="返回" class="BUTTON_STYLE1" onclick="history.back();">
+                    </div>
+                </el-breadcrumb>
+            </div>
+            <el-table :data="tableData"
+                      :border="true" style="width: 100%">
+                <el-table-column prop="ResumeId"
+                                 label="档案编号"
+                                 width="180">
+                </el-table-column>
+                <el-table-column prop="HumanName"
+                                 label="姓名"
+                                 width="180">
+                </el-table-column>
+                <el-table-column prop="HumanMajorKindName"
+                                 label="职位分类"
+                                 width="180">
+                </el-table-column>
+                <el-table-column prop="HunmaMajorName"
+                                 label="职位名称"
+                                 width="180">
+                </el-table-column>
+                <el-table-column prop="InterviewAmount"
+                                 label="面试次数"
+                                 width="180">
+                </el-table-column>
+                <el-table-column prop="RegisteTime"
+                                 label="面试时间"
+                                 width="180">
+                </el-table-column>
+                <el-table-column prop="MultiQualityDegree"
+                                 label="综合素质"
+                                 width="180">
+                </el-table-column>
+                <el-table-column label="筛选">
+                    <template slot-scope="scope">
+                        <el-button size="mini"
+                                   v-on:click="Shai(scope.row)">筛选</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination v-on:size-change="handleSizeChange"
+                           v-on:current-change="handleCurrentChange"
+                           :current-page="currentPage"
+                           :page-sizes="[3, 6, 9, 12]"
+                           :page-size="pageSize"
+                           layout="total, sizes, prev, pager, next, jumper"
+                           :total="rows">
+            </el-pagination>
+        </el-card>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                currentPage: 1,
+                pageSize: 3,
+                rows: 1,
+            },
+            methods: {
+                Fill: function () {
+                    var condition1 = "1=1 and InterviewStatus=0 and CheckStatus IS NULL";
+                
+                    axios.get('/InterviewManagement/EIFenYe2', {
+                        params: {
+                            currentPage: this.currentPage,
+                            pageSize: this.pageSize,
+                            condition: condition1
+                        }
+                    }).then(res => {
+                        console.info(res);
+                        this.tableData = res.data.List;
+                        this.rows = res.data.Rows;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                },
+                handleSizeChange: function (size) {
+                    this.size = size;
+                    this.Fill();
+                },
+                handleCurrentChange: function (currentPage) {
+                    this.currentPage = currentPage;
+                    this.Fill();
+                },
+                Shai: function (row) {
+                    localStorage.setItem("EinId", row.EinId);
+                    localStorage.setItem("ResumeId", row.ResumeId);
+                    window.location.href = '/InterviewManagement/HireResume';
+                }
+            },
+            mounted: function () {
+                this.currentPage = 1;
+                this.Fill();
+            }
+        })
+    </script>
+</body>
+</html>

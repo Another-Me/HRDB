@@ -1,0 +1,131 @@
+﻿
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>I级机构设置修改</title>
+</head>
+<body>
+    <div id="app">
+        <table width="100%">
+            <tr>
+                <td align="right">
+                    <el-button type="primary" v-on:click="Update()">提交</el-button>
+                    <a href="/Customization/Level">返回</a>
+                </td>
+            </tr>
+        </table>
+      
+        <table width="100%" border="1" cellpadding=0 cellspacing=1
+               bordercolorlight=#848284 bordercolordark=#eeeeee
+               class="TABLE_STYLE1">
+            <tr>
+                <td width="19%" class="TD_STYLE1">
+                    I级机构编号
+                </td>
+                <td width="81%" class="TD_STYLE2">
+                    <el-input v-model="FirstKindId" placeholder="请输入内容" :disabled="true" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    I级机构名称
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="FirstKindName" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    薪酬发放责任人编号
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="FirstKindSalaryId" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    销售责任人编号
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="FirstKindSaleId" style="width:30%"></el-input>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                id: "",
+                FirstKindId: '',
+                FirstKindName: '',
+                FirstKindSalaryId: '',
+                FirstKindSaleId: ''
+            },
+            methods: {
+                //查询指定一级数据
+                fill() {
+                    this.id = sessionStorage.getItem("uid");
+                    axios.get('/Customization/Leve1DyidSelect', {
+                        params: {
+                            id: this.id
+                        }
+                    })
+                        .then(res => {
+                            //console.log(res.data);
+                            this.FirstKindId = res.data.FirstKindId
+                            this.FirstKindName = res.data.FirstKindName
+                            this.FirstKindSalaryId = res.data.FirstKindSalaryId
+                            this.FirstKindSaleId = res.data.FirstKindSaleId
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //修改指定一级数据
+                Update() {
+                    axios.get('/Customization/CFFKUpdate',{
+                        params: {
+                            FirstKindId : this.FirstKindId,
+                            FirstKindName : this.FirstKindName,
+                            FirstKindSalaryId : this.FirstKindSalaryId,
+                            FirstKindSaleId : this.FirstKindSaleId,
+                            FfkId: this.id
+                        }
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                alert("修改成功")
+                            } else {
+                                alert("修改失败")
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                }
+                
+            },
+            mounted: function () {
+                this.fill()
+            }
+
+        })
+    </script>
+
+</body>
+</html>
+

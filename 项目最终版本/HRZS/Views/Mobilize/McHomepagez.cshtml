@@ -1,0 +1,161 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>McHomepagez</title>
+</head>
+<body>
+    <div id="app">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>您正在做的业务是：人力资源--调动管理--调动登记查询 </el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <div slot="header" class="clearfix">
+                <el-button style="float: right; padding: 3px 0" type="text" v-on:click="select()">查询</el-button>
+            </div>
+            <div>
+                @*<template>
+        请选择员工所在I级机构
+        <el-select v-model="value1" placeholder="请选择">
+            <el-option v-for="item in options"
+                       :key="item.value"
+                       :label="item.FirstKindName"
+                       :value="item.FirstKindId+'+'+item.FirstKindName"
+                       :disabled="item.disabled">
+            </el-option>
+        </el-select>
+        请选择员工所在II级机构
+        <el-select v-model="value2" placeholder="请选择">
+            <el-option v-for="item in options"
+                       :key="item.value"
+                       :label="item.SecondKindName"
+                       :value="item.SecondKindId+'+'+item.SecondKindName"
+                       :disabled="item.disabled">
+            </el-option>
+        </el-select>
+
+        <div>
+            请选择员工所在III级机构
+            <el-select v-model="value3" placeholder="请选择">
+                <el-option v-for="item in options"
+                           :key="item.value"
+                           :label="item.ThirdKindName"
+                           :value="item.ThirdKindId+'+'+item.ThirdKindName"
+                           :disabled="item.disabled">
+                </el-option>
+            </el-select> 
+                    <template>*@
+                @*级联*@
+                请选择员工所在机构
+                <div>
+                    <el-cascader v-model="value"
+                                 :options="options1"
+                                 :props="b"
+                                 ref="refs"
+                                 v-on:change="handleChange"></el-cascader>
+                </div>
+
+                <span class="demonstration">请输入建档时间</span>
+                <el-date-picker v-model="value4"
+                                type="date"
+                                placeholder="选择日期">
+                </el-date-picker>
+                <span class="demonstration">至</span>
+                <el-date-picker v-model="value5"
+                                align="right"
+                                type="date"
+                                placeholder="选择日期">
+                </el-date-picker>
+              
+            </div>
+             
+            </div>
+      
+    <script type="text/javascript">
+        var vm = new Vue({
+            el:"#app",
+            data:{
+                item: [],
+                value:[],
+                //value1:'',
+                //value2:'',
+                //value3:'',
+                qq: "",
+                ww: "",
+                ee:"",
+                value4:'',
+                value5:'',
+                options: [],
+                options1: [],
+                b: {
+                    label: 'FirstKindName', value: 'FirstKindId', children: 'children',
+                },
+                form:{
+                    FirstKindName: "",
+                    SecondKindName:"",
+                    ThirdKindName:"",
+                    RegistTime:"",
+                    CheckTime:""
+                }
+             },methods:{
+                fill(){
+                    axios.get('../Mobilize/MCISelectCX')
+                    .then(res=>{
+                        //console.log(res.data)
+                        this.options=res.data
+                    })
+                    .catch(err=>{
+                        console.log(err)
+                    })
+                },
+                fnll() {
+                    axios.get('/Mobilize/MCjil')
+                        .then(res => {
+                            this.options1=res.data
+                        }).catch(err => {
+                            console.log(err);
+                        })
+                },
+                handleChange(value) {
+                    const areaText = [];
+                    const arr = this.$refs["refs"].getCheckedNodes()[0].pathNodes;
+                    arr.forEach((i) => {
+                        areaText.push(i.label);
+                    });
+                    this.qq = areaText[0];
+                    this.ww = areaText[1];
+                    this.ee = areaText[2];
+                    //console.log(ee);
+
+                },
+                select(){
+                  localStorage.setItem("qq",this.qq);
+                  localStorage.setItem("ww",this.ww);
+                  localStorage.setItem("ee",this.ee);
+                  //console.log(this.value1)
+                    window.location.href ="MCSekect";
+                },
+             },
+             mounted: function () {
+                 this.fill()
+                this.fnll()
+            },
+      })
+    </script>
+</body>
+</html>
+

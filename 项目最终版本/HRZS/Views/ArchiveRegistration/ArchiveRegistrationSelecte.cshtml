@@ -1,0 +1,295 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>ArchiveRegistrationSelecte</title>
+</head>
+<body>
+    <div id="app">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>您正在做的业务是：人力资源--人力资源档案管理--人力资源档案查询</el-breadcrumb-item>
+                </el-breadcrumb>
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>符合条件的人力资源档案总数：{{rows}}例  </el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <el-form :model="ruleForm"
+                     :rules="rules"
+                     ref="ruleForm"
+                     label-width="100px"
+                     class="demo-ruleForm">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="请选择机构">
+                            <el-cascader expand-trigger="hover"
+                                         v-model="selectedKey"
+                                         :options="parentCateList"
+                                         :props="cascaderProps"
+                                         v-on:change="parentCateChanged"
+                                         ref="casc"
+                                         clearable
+                                         change-on-select>
+                            </el-cascader>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="请选择职位分类：" label-width="135px">
+                            <el-cascader expand-trigger="hover"
+                                         :options="parentCateListTwo"
+                                         :props="cascaderPropsTwo"
+                                         v-model="selectedKeysTwo"
+                                         v-on:change="parentCateChangedTwo"
+                                         clearable
+                                         change-on-select
+                                         ref="cascT"
+                                         class="sel">
+                            </el-cascader>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="请输入关键字：" label-width="135px">
+                            <el-input v-model="ruleForm.HumanName" width="200px"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="11">
+                        <el-form-item label="请输入登记时间：" label-width="135px">
+                            <el-date-picker v-model="ruleForm.RegistTime"
+                                            type="date"
+                                            placeholder="选择日期" value-format="yyyyMMdd">
+                            </el-date-picker>
+                            至
+                            <el-date-picker v-model="ruleForm.RegistTime2"
+                                            type="date"
+                                            placeholder="选择日期" value-format="yyyyMMdd">
+                            </el-date-picker>
+                            （YYYY-MM-DD）
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="5">
+                        <el-button type="primary" v-on:click="ss()">开始</el-button>
+                    </el-col>
+                </el-row>
+              
+                <el-row v-if="list">
+                    <el-breadcrumb separator="/">
+                        <el-breadcrumb-item>符合条件的人力资源档案总数：{{rows}}例  </el-breadcrumb-item>
+                    </el-breadcrumb>
+                    <br />
+                    <br />
+                    <el-col :span="24">
+                        <el-table :data="tableData3"
+                                  :border="true" style="width: 100%">
+                            <el-table-column prop="HumanId"
+                                             label="档案编号"
+                                             width="180">
+                                <template slot-scope="scope">
+                                    <a href="#" v-on:click="handleColumnClick(scope.row.HufId)">{{ scope.row.HumanId }}</a>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="HumanName"
+                                             label="姓名"
+                                             width="180">
+                            </el-table-column>
+                            <el-table-column prop="HumanSex"
+                                             label="性别"
+                                             width="180">
+                            </el-table-column>
+                            <el-table-column prop="FirstKindName"
+                                             label="I级机构"
+                                             width="180">
+                            </el-table-column>
+                            <el-table-column prop="SecondKindName"
+                                             label="II级机构"
+                                             width="180">
+                            </el-table-column>
+                            <el-table-column prop="ThirdKindName"
+                                             label="III级机构"
+                                             width="180">
+                            </el-table-column>
+                            <el-table-column prop="HumanMajorKindName"
+                                             label="职位分类"
+                                             width="180">
+                            </el-table-column>
+                            <el-table-column prop="HunmaMajorName"
+                                             label="职位名称"
+                                             width="180">
+                            </el-table-column>
+
+                        </el-table>
+                        <div class="block">
+                            @*分页查询*@
+                            <el-pagination v-on:size-change="handleSizeChange"
+                                           v-on:current-change="handleCurrentChange"
+                                           :currentpage="currentPage"
+                                           :page-sizes="[3,6,9,12]"
+                                           :page-size="pageSize"
+                                           layout="total, sizes, prev, pager, next, jumper"
+                                           :total="rows">
+                            </el-pagination>
+                        </div>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </el-card>
+    </div>
+    <script type="text/javascript">
+	var vm=new Vue({
+		el:"#app",
+        data: {
+            list: false,
+			currentPage:1,
+            pageSize: 3,
+            rows: 1,
+            selectedKey: [],
+            parentCateList: [],
+			selectedKeysTwo: [],
+			parentCateListTwo: [],
+            sv: [],
+            sz: [],
+            cascaderProps: {
+                label: 'FirstKindName',
+                value: 'FirstKindId',
+                children: 'Chlidren'
+            },
+            cascaderPropsTwo: {
+                label: 'MajorKindName',
+                value: 'MajorKindId',
+                children: 'Chlidren'
+            },
+			ruleForm:{
+				HumanName:"",
+				RegistTime:"",
+				RegistTime2:"",
+			},
+			majorKindName: "",
+            majorName: "",
+            FirstKindName:"",
+            SecondKindName:"",
+            ThirdKindName:"",
+			rules:{
+
+			},
+			tableData3:[],
+			tableData2:[],
+			tableData:[],
+		},
+		methods:{
+            //级联下拉框查询
+            jilian: function () {
+                axios.get("/ArchiveRegistration/CascadeAsync").then((res) => {
+                    this.parentCateList = res.data;
+                }).catch(err => {
+                    console.info(err);
+                })
+                axios.get('/ArchiveRegistration/ZhiWeiCascadeAsync').then((res) => {
+                    this.parentCateListTwo = res.data;
+                }).catch(err => {
+                    console.info(err);
+                })
+            },
+            //级联下拉框选择改变事件
+            parentCateChanged: function () {
+                console.info(this.selectedKey.length);
+                if (this.selectedKey.length > 0) {
+                    this.sz = this.$refs["casc"].getCheckedNodes()[0].pathLabels;
+                }
+            },
+            //级联下拉框选择改变事件
+            parentCateChangedTwo: function () {
+                console.info(this.selectedKeysTwo.length);
+                if (this.selectedKeysTwo.length > 0) {
+                    this.sv = this.$refs["cascT"].getCheckedNodes()[0].pathLabels;
+                }
+            },
+            ss() {
+                this.list = true;
+				var t=this;
+				t.majorKindName = t.sv[0];
+                t.majorName = t.sv[1];
+                t.FirstKindName = t.sz[0];
+                t.SecondKindName = t.sz[1];
+                t.ThirdKindName = t.sz[2];
+                var condition1 = "1=1  and CheckStatus=1 and HumanFileStatus=2";
+
+                if (t.majorKindName != undefined) {
+                    condition1 += " and HumanMajorKindName like '%" + t.majorKindName + "%' "
+                }
+                
+                if (t.majorKindName != undefined && t.majorName != undefined) {
+                    condition1 += " and HumanMajorKindName like '%" + t.majorKindName + "%' and HunmaMajorName like '%" + t.majorName + "%'"
+                }
+                if (t.FirstKindName != undefined) {
+                    condition1 += " and FirstKindName like '%" + t.FirstKindName + "%' "
+                }
+                if (t.SecondKindName != undefined) {
+                    condition1 += "  and FirstKindName like '%" + t.SecondKindName + "%'"
+                }
+                if (t.ThirdKindName != undefined) {
+                    condition1 += "  and ThirdKindName like '%" + t.ThirdKindName + "%'"
+                }
+                if (t.FirstKindName != undefined && t.SecondKindName != undefined && t.ThirdKindName != undefined) {
+                    condition1 += " and FirstKindName like '%" + t.FirstKindName + "%' and SecondKindName like '%" + t.SecondKindName + "%' and ThirdKindName like '%" + t.ThirdKindName + "%'"
+                }
+                if (t.ruleForm.HumanName!="") {
+                    condition1 += " and (HumanName like '%" + t.ruleForm.HumanName + "%' or HumanHomephone like '%" + t.ruleForm.HumanName + "%' or HumanIdcard like '%" + t.ruleForm.HumanName+"%'"
+                }
+                if (t.ruleForm.RegistTime != "" && t.ruleForm.RegistTime2 !="") {
+                    condition1 += " and RegistTime  >='" + t.ruleForm.RegistTime + "' and RegistTime <= '" + t.ruleForm.RegistTime2 + "'"
+                }
+				console.info(t.majorKindName + t.majorName);
+                axios.get('/ArchiveRegistration/DanAnSelect', {
+					params:{
+                            PageSize: t.pageSize,
+                            CurrentPage: t.currentPage,
+                            condition: condition1
+					}
+				}).then(res=>{
+					console.info(res);
+					t.tableData3 = res.data.List;
+					t.rows = res.data.Rows;
+				})
+			},
+			handleSizeChange: function (size) {
+                this.pageSize = size;
+                this.currentPage = 1;
+                this.ss();
+			},
+            handleCurrentChange: function (cpage) {
+
+                this.currentPage = cpage;
+                this.ss();
+            },
+			
+            handleColumnClick(HufId) {
+                localStorage.setItem("HufId2", HufId);
+                window.location.href = '/ArchiveRegistration/ArchiveRegistrationInfoShow';
+			}
+		},
+        mounted: function () {
+			this.jilian();
+		}
+	})
+    </script>
+</body>
+</html>

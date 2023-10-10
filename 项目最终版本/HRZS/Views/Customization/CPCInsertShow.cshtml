@@ -1,0 +1,113 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>CPCInsertShow</title>
+</head>
+<body>
+        <div class="container" id="app">
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <el-breadcrumb separator="/">
+                        <el-breadcrumb-item>您正在做的业务是：人力资源--客户化设置--人力资源档案管理设置--公共属性设置--公共属性添加  </el-breadcrumb-item>
+                    </el-breadcrumb>
+                </div>
+                <div>
+                    <el-form :model="AddForm" ref="AddForm" :rules="rules" label-width="120px" class="demo-ruleForm">
+                        <el-form-item label="属性种类" prop="AttributeKind">
+                            <el-input v-model="AddForm.AttributeKind" style="width:auto"></el-input>
+                        </el-form-item>
+                        <el-form-item label="属性名称" prop="AttributeName">
+                            <el-input v-model="AddForm.AttributeName" style="width:auto"></el-input>
+                        </el-form-item>
+                    </el-form>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button type="primary" v-on:click="submitForm('AddForm')">确 定</el-button>
+                        <el-button v-on:click="qu()">取 消</el-button>
+                    </span>
+                </div>
+            </el-card>
+        </div>
+        <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                items: [],
+                AddForm: {
+                    PbcId: "",
+                    AttributeKind: "",
+                    AttributeName: "",
+                },
+                rules: {
+                    AttributeKind: [
+                        { required: true, message: '请输入属性种类', trigger: 'blur' }
+                    ],
+                    AttributeName: [
+                        { required: true, message: '请输入属性名称', trigger: 'blur' }
+                    ]
+                },
+
+            },
+            methods: {
+              
+                Add() {
+                    var t = this;
+
+                    axios.post('/Customization/InsertCPC', {
+                        AttributeKind: t.AddForm.AttributeKind,
+                        AttributeName: t.AddForm.AttributeName,
+
+                    }).then(res => {
+                        if (res.data > 0) {
+                            t.$message({
+                                message: "添加成功",
+                                type: "success"
+                            });
+                            window.location = "/Customization/GongGongShow/";
+                        } else {
+                            t.$message({
+                                message: "添加失败",
+                                type: "error"
+                            });
+                        }
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+
+                },
+                submitForm: function (formName) {
+                    this.$refs[formName].validate((valid) => {
+                        if (valid) {
+                            this.Add();
+                        } else {
+                            console.info('err submit');
+                            return false;
+                        }
+                    })
+
+                },
+                qu() {
+                    window.location = "/Customization/GongGongShow/";
+                },
+            }, mounted: function () {
+              
+
+            }
+        });
+
+
+        </script>
+</body>
+</html>

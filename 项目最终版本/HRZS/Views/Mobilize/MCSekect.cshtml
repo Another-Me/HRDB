@@ -1,0 +1,144 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>MCSekect</title>
+</head>
+<body>
+    <div id="app">
+        <div slot="header" class="clearfix">
+                    <el-breadcrumb separator="/">
+                        <el-breadcrumb-item>您在做的业务是-人力资源-调动管理-调动登记列表</el-breadcrumb-item>
+                    </el-breadcrumb>
+                </div>
+        <template>
+            <el-table :data="tablelist"
+                      border
+                      style="width: 100%">
+                <el-table-column fixed
+                                 prop="FirstKindName"
+                                 label="I级机构"
+                                 width="120">
+                </el-table-column>
+                <el-table-column prop="SecondKindName"
+                                 label="II级机构 "
+                                 width="120">
+                </el-table-column>
+                <el-table-column prop="ThirdKindName"
+                                 label="Ⅲ级机构 "
+                                 width="120">
+                </el-table-column>
+                <el-table-column prop="HumanName"
+                                 label="名字"
+                                 width="120">
+                </el-table-column>
+                <el-table-column label="调动">
+                    <template slot-scope="scope">
+                        <el-button type="primary" size="small" v-on:click="dlet(scope.row.HumanId)">调动 </el-button>
+
+                    </template>
+            </el-table>
+        </template>
+        <el-pagination v-on:size-change="handleSizeChange"
+                       v-on:current-change="handleCurrentChange"
+                       :currentpage="currentPage"
+                       :page-sizes="[3, 6, 9, 12]"
+                       :page-size="pageSize"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="rows">
+        </el-pagination>
+    </div>
+    <script type="text/javascript">
+      var vm=new Vue({
+             el:"#app",
+             data:{
+                 tablelist:[],
+                 currentPage: 1,
+                 value1:'',
+                 value2:'',
+                 value3:'',
+                 pageSize: 3,
+                 rows: 1,
+             },methods:{
+                dlet(id) {
+                   sessionStorage.setItem("Mid", id);
+                   console.log(id);
+                     window.location = "/Mobilize/MCDDSelect";
+
+                 },fill(){
+               var yi="'"+localStorage.getItem("qq")+"'";
+               var er="'"+localStorage.getItem("ww")+"'";
+               var san ="'"+localStorage.getItem("ee")+"'";
+               //console.log(yi+"...."+er)
+                   if(yi!="'undefined'" && er!="'undefined'"&& san=="'undefined'"){
+                       axios.get('../Mobilize/MCSelectAsyns',{
+                           params:{
+                               CurrentPage:this.currentPage,
+                               PageSize:this.pageSize,
+                               Where:"FirstKindName="+yi+"and SecondKindName=" +er
+                           }
+                       }).then(res=>{
+                           console.log(res.data);
+                           this.tablelist=res.data.List;
+                           this.rows=res.data.Rows;
+                       }).catch(err=>{
+                           console.log(err);
+                       })
+                   }else if(er=="'undefined'"&& san=="'undefined'"){
+                        axios.get('../Mobilize/MCSelectAsyns',{
+                           params:{
+                               CurrentPage:this.currentPage,
+                               PageSize:this.pageSize,
+                               Where:"FirstKindName="+yi
+                           }
+                       }).then(res=>{
+                           console.log(res.data);
+                           this.tablelist=res.data.List;
+                           this.rows=res.data.Rows;
+                       }).catch(err=>{
+                           console.log(err);
+                       })
+                   }else if( yi!="'undefined'" && er!="'undefined'"&& san!="'undefined'"){
+                        axios.get('../Mobilize/MCSelectAsyns',{
+                           params:{
+                               CurrentPage:this.currentPage,
+                               PageSize:this.pageSize,
+                               Where:"FirstKindName="+yi+"and SecondKindName=" +er+"and ThirdKindName="+san
+                           }
+                       }).then(res=>{
+                           console.log(res.data);
+                           this.tablelist=res.data.List;
+                           this.rows=res.data.Rows;
+                       }).catch(err=>{
+                           console.log(err);
+                       })
+                   }
+                 }, handleSizeChange: function (size) {
+                     this.currentPage = 1;
+                     this.pageSize = size;
+                 },
+                 handleCurrentChange: function (page) {
+                     this.currentPage = page;
+                     this.fill();
+                 }
+               },
+          mounted: function () {
+              this.fill();
+          }
+
+    })
+    </script>
+</body>
+</html>

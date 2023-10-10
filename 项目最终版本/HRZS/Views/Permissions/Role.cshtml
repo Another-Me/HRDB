@@ -1,0 +1,193 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>权限管理</title>
+</head>
+<body>
+    <div id="app">
+        <el-button type="primary" v-on:click="Inserts()">添加</el-button>
+        <el-table :data="tableData"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="RolesID"
+                             label="角色编号">
+            </el-table-column>
+            <el-table-column prop="RolesName"
+                             label="角色名称">
+            </el-table-column>
+            <el-table-column prop="RolesInstruction"
+                             label="角色说明">
+            </el-table-column>
+            <el-table-column prop="RolesIf"
+                             label="是否可用">
+            </el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button v-if="scope.row.RolesName == '系统管理员'" clearable :disabled='true' type="primary" icon="el-icon-edit" circle v-on:click="drawer = true,Updatesid(scope.row.RolesID)"></el-button>
+                    <el-button v-if="scope.row.RolesName != '系统管理员'" type="primary" icon="el-icon-edit" circle v-on:click="drawer = true,Updatesid(scope.row.RolesID)"></el-button>
+                    <el-button v-if="scope.row.RolesName == '系统管理员'" clearable :disabled='true' type="danger" icon="el-icon-delete" circle v-on:click="deletes(scope.row.RolesID)"></el-button>
+                    <el-button v-if="scope.row.RolesName != '系统管理员'" type="danger" icon="el-icon-delete" circle v-on:click="deletes(scope.row.RolesID)"></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <el-drawer :visible.sync="drawer"
+                   :direction="direction"
+                   :before-close="handleClose">
+
+            <el-tree :data="data"
+                     default-expand-all
+                     accordion
+                     ref="rolesJurisdiction"
+                     show-checkbox
+                     node-key="JuriID"
+                     :default-checked-keys.sync="defualtkeys"
+                     :props="defaultProps"
+                     @@check="getid">
+            </el-tree>
+
+            <el-button type="primary" v-on:click="RJInserts()">确认</el-button>
+
+        </el-drawer>
+
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                drawer: false,
+                direction: 'rtl',
+                tableData: [],
+                data: [],
+                defaultProps: {
+                    label: "JurName",
+                    children:"children"
+                },
+                defualtkeys: [],
+                uid:0
+            },
+            methods: {
+                //查询用户数据
+                fill() {
+                    axios.get('/Permissions/RolesSelect')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.tableData = res.data
+
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //增加页面
+                Inserts() {
+                    window.location.href = '../Permissions/RoleInsert';
+                },
+                //删除
+                deletes(id) {
+                    axios.post('/Permissions/RolesDelete', {
+                        id:id
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                alert("删除成功");
+                                this.fill()
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //关闭抽屉
+                handleClose(done) {
+                    this.$confirm('确认关闭？')
+                        .then(_ => {
+                            done();
+                        })
+                        .catch(_ => { });
+                },
+                //查询所有权限
+                Updates() {
+                    axios.get('/Permissions/JurisdictionList')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.data=res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //查询指定角色权限
+                Updatesid(id) {
+                    //alert(id);
+                    this.uid=id
+                    axios.get('/Permissions/selectRolesJurisdiction', {
+                        params: {
+                            id:id
+                        }
+                    })
+                        .then(res => {
+                            //console.log(res.data);
+                            this.defualtkeys = res.data
+                            //console.log(this.defualtkeys);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //查看节点选中
+                getid() {
+                    //console.log(this.$refs.rolesJurisdiction.getCheckedKeys());
+                    this.rolesJurisdiction = this.$refs.rolesJurisdiction.getCheckedKeys()
+                },
+                RJInserts() {
+                    axios.post('/Permissions/deleteRolesJurisdiction', {
+                        id:this.uid
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                alert("删除成功")
+                            }
+                            for (var i in this.rolesJurisdiction) {
+                                //alert(this.rolesJurisdiction);
+                                axios.post('/Permissions/insertRolesJurisdiction', {
+                                    RolesID: this.uid,
+                                    JuriID: this.rolesJurisdiction[i]
+                                })
+                                    .then(res => {
+                                        if (res.data > 0) {
+                                            console.log("增加成功");
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.log(err);
+                                    })
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+                this.Updates()
+            }
+        })
+    </script>
+</body>
+</html>

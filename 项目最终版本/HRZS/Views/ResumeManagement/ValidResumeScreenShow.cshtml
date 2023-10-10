@@ -1,0 +1,138 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>ValidResumeScreenShow</title>
+</head>
+<body>
+    <div id="app">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>您正在做的业务是：人力资源--招聘管理--简历管理--有效简历查询 </el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <el-form :model="ruleForm"
+                     :rules="rules"
+                     ref="ruleForm"
+                     label-width="100px"
+                     class="demo-ruleForm">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="请选择职位分类：" label-width="135px">
+                            <el-cascader expand-trigger="hover"
+                                         :options="parentCateListTwo"
+                                         :props="cascaderPropsTwo"
+                                         v-model="selectedKeysTwo"
+                                         v-on:change="parentCateChangedTwo"
+                                         clearable
+                                         change-on-select
+                                         ref="cascT"
+                                         class="sel">
+                            </el-cascader>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="请输入关键字：" label-width="135px">
+                            <el-input v-model="ruleForm.HumanName" width="200px"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="11">
+                        <el-form-item label="请输入登记时间：" label-width="135px">
+                            <el-date-picker v-model="ruleForm.RegistTime"
+                                            type="date"
+                                            placeholder="选择日期" value-format="yyyyMMdd">
+                            </el-date-picker>
+                            至
+                            <el-date-picker v-model="ruleForm.RegistTime2"
+                                            type="date"
+                                            placeholder="选择日期" value-format="yyyyMMdd">
+                            </el-date-picker>
+                            （YYYY-MM-DD）
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="5">
+                        <el-button type="primary" v-on:click="ss()">开始</el-button>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </el-card>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                selectedKeysTwo: [],
+                parentCateListTwo: [],
+                sv: [],
+                cascaderPropsTwo: {
+                    label: 'MajorKindName',
+                    value: 'MajorKindId',
+                    children: 'Chlidren'
+                },
+                ruleForm: {
+                    HumanName: "",
+                    RegistTime: "",
+                    RegistTime2: "",
+                },
+                majorKindName: "",
+                majorName: "",
+                rules: {
+
+                },
+                tableData2: [],
+                tableData: [],
+            },
+            methods: {
+                //级联下拉框选择改变事件
+                parentCateChangedTwo: function () {
+                    console.info(this.selectedKeysTwo.length);
+                    if (this.selectedKeysTwo.length > 0) {
+                        this.sv = this.$refs["cascT"].getCheckedNodes()[0].pathLabels;
+                    }
+                },
+                //级联下拉框查询
+                jilian: function () {
+                    axios.get('/ArchiveRegistration/ZhiWeiCascadeAsync').then((res) => {
+                        this.parentCateListTwo = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                    })
+                },
+                ss() {
+                    var t = this;
+                    t.majorKindName = t.sv[0];
+                    t.majorName = t.sv[1];
+                    localStorage.setItem("majorKindName", t.majorKindName);
+                    localStorage.setItem("majorName", t.majorName);
+                    localStorage.setItem("HumanName", t.ruleForm.HumanName);
+                    localStorage.setItem("RegistTime", t.ruleForm.RegistTime);
+                    localStorage.setItem("RegistTime2", t.ruleForm.RegistTime2);
+                    window.location.href = '/InterviewManagement/InterviewResltRegister';
+                }
+             
+            },
+            mounted: function () {
+                this.jilian();
+            }
+        })
+    </script>
+</body>
+</html>
+

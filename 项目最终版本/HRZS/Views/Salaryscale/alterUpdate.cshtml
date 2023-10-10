@@ -1,0 +1,297 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <style>
+        .TD_STYLE1 {
+            border-width: 1px;
+            padding: 0px 0px 0px 40px;
+        }
+    </style>
+    <title>薪酬标准变更跳转的分页修改</title>
+</head>
+<body>
+    <div id="app">
+        <table width="100%">
+            <tr>
+                <td align="right">
+                    <input type="button" value="提 交" v-on:click="check()" class="BUTTON_STYLE1">
+                    <a href="/Salaryscale/Review">返回</a>
+                </td>
+            </tr>
+        </table>
+        <table id="stable" width="100%" border="1" cellpadding=0 cellspacing=1
+               bordercolorlight=#848284 bordercolordark=#eeeeee
+               class="TABLE_STYLE1">
+            <tr>
+                <td width="74" class="TD_STYLE1">
+                    薪酬标准编号
+                </td>
+                <td width="168" class="TD_STYLE2">
+                    <el-input v-model="random" :disabled="true" placeholder=""></el-input>
+                </td>
+                <td width="83" class="TD_STYLE1">
+                    薪酬标准名称
+                </td>
+                <td width="171" class="TD_STYLE2">
+                    <el-input v-model="StandardName" placeholder="请输入内容"></el-input>
+                </td>
+                <td width="170" class="TD_STYLE1">
+                    薪酬总额
+                </td>
+                <td width="138" class="TD_STYLE2">
+                    <el-input v-model="jiage" :disabled="true">
+                    </el-input>
+                </td>
+                <td width="103" class="TD_STYLE1">
+                    &nbsp;
+                </td>
+                <td width="95" height="26" class="TD_STYLE2">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    制定人
+                </td>
+                <td class="TD_STYLE2">
+                    <el-select v-model="Designer" placeholder="请选择">
+                        <el-option v-for="item in options"
+                                   :key="item.UTrueName"
+                                   :label="item.UTrueName"
+                                   :value="item.UTrueName">
+                        </el-option>
+                    </el-select>
+                </td>
+                <td class="TD_STYLE1">
+                    变更人
+                </td>
+                <td class="TD_STYLE2">
+                    <el-select v-model="Checker" placeholder="请选择">
+                        <el-option v-for="item in options"
+                                   :key="item.UTrueName"
+                                   :label="item.UTrueName"
+                                   :value="item.UTrueName">
+                        </el-option>
+                    </el-select>
+                </td>
+                <td class="TD_STYLE1">
+                    登记时间
+                </td>
+                <td class="TD_STYLE2">
+                    <div id="real-time-clock"></div>
+                </td>
+                <td class="TD_STYLE1">
+                    &nbsp;
+                </td>
+                <td class="TD_STYLE2">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    备注
+                </td>
+                <td colspan="7" class="TD_STYLE2">
+                    <el-input v-model="Remark" placeholder="请输入内容"></el-input>
+                </td>
+            </tr>
+        </table>
+        <el-table :data="tableData" style="width: 100%">
+            <el-table-column prop="ItemId"
+                             label="序号"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="ItemName"
+                             label="薪酬项目名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="Salary" label="金额">
+                <template slot-scope="scope">
+                    <input type="number" name="hie" v-on:blur="shijiao(scope.row.SdtId,scope.row.Salary)" v-model="scope.row.Salary" />
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <script type="text/javascript">
+        var sj = "";
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                random: '',
+                StandardName:'',
+                jiage: '',
+                Designer: '',
+                Checker: '',
+                Salary: '',
+                Remark: '',
+                StandardId:'',
+                id: '',
+                Remark:'',
+                value: '',
+                label: '',
+                options:[]
+            },
+            methods: {
+                //查询ss
+                fill() {
+                    this.Checker = sessionStorage.getItem("name")
+                    this.id = sessionStorage.getItem("uid")
+                    //alert(this.id)
+                    axios.get('/Salaryscale/SleseSSDyid', {
+                        params: {
+                            ss: this.id
+                        }
+                    })
+                        .then(res => {
+                            //this.tableData = res.data;
+                            this.StandardName = res.data.StandardName
+                            this.random = res.data.StandardId
+                            this.jiage = res.data.SalarySum
+                            this.Designer = res.data.Designer
+                            this.Register = res.data.Register
+                            //console.log(res.data)
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //查询ssd
+                frll() {
+                    axios.get('../Salaryscale/SelectSSDDyid', {
+                        params: {
+                            dd: this.id
+                        }
+                    })
+                        .then(res => {
+                            //this.tableData = res.data;
+                            this.tableData = res.data
+                            this.Salary = res.data.Salary
+                            //console.log(res.data)
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                fell() {
+                    axios.get('/Salaryscale/StandardSelectUser')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.options = res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //修改
+                check() {
+                    //console.log('主键：' + this.id);
+                    //console.log("名称" + this.StandardName);
+                    //console.log("制定者"+this.Designer);
+                    //console.log("变更人" + this.Checker);
+                    //console.log("变更时间" + sj);
+                    //console.log("总额" + this.jiage);
+                    //console.log("备注" + this.Remark);
+                    axios.get('/Salaryscale/DyidSSUpdate', {
+                        params: {
+                            StandardName: this.StandardName,
+                            Designer: this.Designer,
+                            Changer: this.Checker,
+                            ChangeTime: sj,
+                            SalarySum: this.jiage,
+                            Remark: this.Remark,
+                            StandardId: this.id
+                        }
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                alert('修改成功')
+                                window.location = "/Salaryscale/alter";
+                            } else {
+                                alert('修改失败')
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //失焦修改金额
+                shijiao(id, uid) {
+                    var zong = 0;
+                    const inputs = document.getElementsByName("hie");
+                    inputs.forEach((input) => {
+                        zong += parseFloat(input.value) || 0;
+                    })
+                    this.jiage = zong;
+                    console.log(id);
+                    console.log(uid);
+
+                    axios.post('/Salaryscale/SSDSalaryUpdate', {
+                        id: id,
+                        uid:uid
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                console.log("金额修改成功");
+                            } else {
+                                console.log("金额修改失败");
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                }
+            },
+            mounted: function () {
+                this.fill()
+                this.frll()
+                this.fell()
+            }
+        })
+        function updateClock() {
+            //获取时间
+            var currentTime = new Date();
+
+
+            //获取年月日
+            var year = currentTime.getFullYear();
+            var month = currentTime.getMonth() + 1;
+            var day = currentTime.getDate();
+
+            //获取时分秒
+            var hours = currentTime.getHours();
+            var minutes = currentTime.getMinutes();
+            var seconds = currentTime.getSeconds();
+
+            // 添加前导零，确保时间始终以两位数显示
+            hours = (hours < 10 ? "0" : "") + hours;
+            minutes = (minutes < 10 ? "0" : "") + minutes;
+            seconds = (seconds < 10 ? "0" : "") + seconds;
+
+            // 构建时间字符串
+            var timeString = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+
+            //连接到div，更新页面上显示时间的元素
+            document.getElementById("real-time-clock").innerHTML = timeString;
+
+            //赋值
+            this.sj = timeString;
+        }
+        // 每秒钟调用一次updateClock函数
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,729 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>ArchiveRegistrationInfoShow</title>
+</head>
+<body>
+    <div id="app">
+        <form id="recruitAction!saveEngageResume" name="fm" action="/HR_Fist/recruit/recruitAction!saveEngageResume" method="post" enctype="multipart/form-data">
+            <table width="100%">
+                <tr>
+                    <td>
+                        <font color="black">
+                            您正在做的业务是：人力资源--人力资源档案管理--人力资源档案查看
+                        </font>
+                        <el-button type="primary" onclick="history.back()" size="small" class="bnt">返回</el-button>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                    </td>
+                </tr>
+            </table>
+            <br />
+            <el-form :model="AddForm"
+                     ref="AddForm"
+                     :rules="rules"
+                     label-width="100px"
+                     class="demo-ruleForm">
+                <el-row>
+                    <el-form-item label="档案编号：" prop="HumanId">
+                        {{AddForm.HumanId}}
+                    </el-form-item>
+                </el-row>
+
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="机构" prop="selectedKey">
+                            <el-cascader v-model="selectedKey" :options="parentCateList" :props="cascaderProps" v-on:change="parentCateChanged"
+                                         ref="casc"
+                                         :style="{width: '100%'}" placeholder="请选择级联选择" clearable :disabled='true'></el-cascader>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="职位:" prop="selectedKeysTwo">
+                            <el-cascader v-model="selectedKeysTwo" :options="parentCateListTwo" :props="cascaderPropsTwo" v-on:change="parentCateChangedTwo"
+                                         ref="cascT"
+                                         :style="{width: '100%'}" clearable :disabled='true'></el-cascader>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="职称：" prop="HumanProDesignation">
+                            <el-select v-model="AddForm.HumanProDesignation" :disabled='true'>
+                                <el-option v-for="item in config_public_char10"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName"
+                                           >
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <div class="upload">
+                    <el-upload class="avatar-uploader"
+                               action="/ResumeManagement/WSC"
+                               :show-file-list="false"
+                               :on-success="pictureSuccess"
+                               :disabled='true'>
+                        <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                    </el-upload>
+                </div>
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="姓名：" prop="HumanName">
+                            <el-input v-model="AddForm.HumanName" width="20px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="性别：" prop="HumanSex">
+                            <el-select v-model="AddForm.HumanSex" clearable :disabled='true'>
+                                <el-option v-for="item in Sexoptions"
+                                           :key="item.value"
+                                           :label="item.label"
+                                           :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="Email：" prop="HumanEmail">
+                            <el-input v-model="AddForm.HumanEmail" width="20px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="电话：" prop="HumanTelephone">
+                            <el-input v-model="AddForm.HumanTelephone" width="20px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="QQ：" prop="HumanQQ">
+                            <el-input v-model="AddForm.HumanQQ" width="20px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="手机：" prop="HumanMobilephone">
+                            <el-input v-model="AddForm.HumanMobilephone" width="20px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="9">
+                        <el-form-item label="住址：" prop="HumanAddress">
+                            <el-input v-model="AddForm.HumanAddress" width="20px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="9">
+                        <el-form-item label="邮编：" prop="HumanPostcode">
+                            <el-input v-model="AddForm.HumanPostcode" width="20px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="5">
+                        <el-form-item label="国籍：" prop="HumanNationality">
+                            <el-select v-model="AddForm.HumanNationality" :disabled='true'>
+                                <el-option v-for="item in config_public_char"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="出生地：" prop="HumanBirthplace">
+                            <el-input v-model="AddForm.HumanBirthplace" width="80px" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="生日：" prop="HumanBirthday">
+                            <el-input v-model="AddForm.HumanBirthday" :style="{width: '80%'}" clearable :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-form-item label="民族：" prop="HumanRace">
+                            <el-select v-model="AddForm.HumanRace" :disabled='true'>
+                                <el-option v-for="item in config_public_char2"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+
+                    <el-col :span="5">
+                        <el-form-item label="宗教信仰：" prop="HumanReligion">
+                            <el-select v-model="AddForm.HumanReligion" :disabled='true'>
+                                <el-option v-for="item in config_public_char3"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="政治面貌：" prop="HumanParty">
+                            <el-select v-model="AddForm.HumanParty" :style="{width: '50%'}" :disabled='true'>
+                                <el-option v-for="item in config_public_char9"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="身份证号码：" prop="HumanIdCard" label-width="108px" :maxlength="18">
+                            <el-input v-model="AddForm.HumanIdCard" width="20px" :disabled='true' :style="{width: '80%'}"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="社会保障号码：" prop="HumanSocietySecurityId" label-width="130px" :maxlength="9" :disabled='true'>
+                            <el-input v-model="AddForm.HumanSocietySecurityId" width="20px"
+                                      clearable></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="5">
+                        <el-form-item label="年龄：" prop="HumanAge">
+                            <el-input v-model="AddForm.HumanAge" width="20px"
+                                      :style="{width: '50%'}" clearable :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="学历：" prop="HumanEducatedDegree">
+                            <el-select v-model="AddForm.HumanEducatedDegree" :disabled='true'>
+                                <el-option v-for="item in config_public_char6"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="教育年限：" prop="HumanEducatedYears">
+                            <el-select v-model="AddForm.HumanEducatedYears" :disabled='true'>
+                                <el-option v-for="item in config_public_char4"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="学历专业：" prop="HumanEducatedMajor">
+                            <el-select v-model="AddForm.HumanEducatedMajor" :disabled='true'>
+                                <el-option v-for="item in config_public_char5"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="5">
+                        <el-form-item label="薪酬标准：" prop="SalaryStandardId">
+                            <el-select v-model="StandardName2" v-on:change="SalaryStandardNameChanged" ref="mySelect" :disabled='true'>
+                                <el-option v-for="item in config_public_char11"
+                                           :key="item.StandardId"
+                                           :label="item.StandardName"
+                                           :value="{value:item.StandardId,label:item.StandardName}">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="开户行：" prop="HumanBank">
+                            <el-select v-model="AddForm.HumanBank" :disabled='true'>
+                                <el-option v-for="item in HumanBankoptions"
+                                           :key="item.value"
+                                           :label="item.label"
+                                           :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="银行帐号：" prop="HumanAccount">
+                            <el-input v-model="AddForm.HumanAccount" width="20px" :style="{width: '80%'}" :disabled='true'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="复核人：" prop="Checker">
+                            <el-input v-model="AddForm.Checker" width="20px"
+                                      :style="{width: '50%'}" readonly="readonly"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="5">
+                        <el-form-item label="复核时间：" prop="RegistTime">
+                            <el-input v-model="AddForm.RegistTime" width="20px" id="nowTime" readonly='readonly'></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="特长：" prop="HumanSpeciality">
+                            <el-select v-model="AddForm.HumanSpeciality" :disabled='true'>
+                                <el-option v-for="item in config_public_char7"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="爱好：" prop="HumanHobby">
+                            <el-select v-model="AddForm.HumanHobby" :disabled='true'>
+                                <el-option v-for="item in config_public_char8"
+                                           :key="item.PbcId"
+                                           :label="item.AttributeName"
+                                           :value="item.AttributeName">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="20">
+                        <el-form-item label="档案附件：" prop="AttachmentName">
+                            <a href="#" v-on:click="dakai1()">{{AddForm.AttachmentName}}</a>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="20">
+                        <el-form-item label="个人履历：" prop="HumanHistroyRecords">
+                            <a href="#" v-on:click="dakai()">{{AddForm.HumanHistroyRecords}}</a>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="20">
+                        <el-form-item label="家庭关系：" prop="HumanFamilyMembership">
+                            <el-input type="textarea"
+                                      :rows="3"
+                                      v-model="AddForm.HumanFamilyMembership"
+                                      readonly='readonly'>
+                            </el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="20">
+                        <el-form-item label="备注：" prop="Remark">
+                            <el-input type="textarea"
+                                      :rows="3"
+                                      v-model="AddForm.Remark"
+                                      :disabled='true'>
+                            </el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </form>
+    </div>
+    <script type="text/javascript">
+
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                StandardName2: "",
+                fileList: [],
+                AddForm: {
+                    HufId: "",
+                    HumanId: "",
+                    FirstKindId: "",
+                    FirstKindName: "",
+                    SecondKindId: "",
+                    SecondKindName: "",
+                    ThirdKindId: "",
+                    ThirdKindIName: "",
+                    HumanName: "",
+                    HumanAddress: "",
+                    HumanPostcode: "",
+                    HumanProDesignation: "",
+                    HumanMajorKindId: "",
+                    HumanMajorKindName: "",
+                    HumanMajorId: "",
+                    HunmaMajorName: "",
+                    HumanTelephone: "",
+                    HumanMobilephone: "",
+                    HumanBank: "",
+                    HumanAccount: "",
+                    HumanQQ: "",
+                    HumanEmail: "",
+                    HumanHobby: "",
+                    HumanNationality: "",
+                    HumanSex: "",
+                    HumanReligion: "",
+                    HumanParty: "",
+                    HumanSpeciality: "",
+                    HumanRace: "",
+                    HumanBirthday: "",
+                    HumanBirthplace: "",
+                    HumanAge: "",
+                    HumanEducatedDegree: "",
+                    HumanEducatedYears: "",
+                    HumanEducatedMajor: "",
+                    HumanSocietySecurityId: "",
+                    HumanIdCard: "",
+                    Remark: "",
+                    SalaryStandardId: "",
+                    SalaryStandardName: "",
+                    HumanFamilyMembership: "",
+                    HumanPicture: "",
+                    Checker: localStorage.getItem("username"),
+                    HumanFileStatus: "",
+                    RegistTime: "",
+                    HumanHistroyRecords: "",
+                    CheckTime: "",
+                    AttachmentName:"",
+                },
+                imageUrl: "",
+                rules: {
+                  
+                },
+                selectedKeysTwo: [],
+                selectedKey: [],
+                parentCateList: [],
+                parentCateListTwo: [],
+                sv: [],
+                sz: [],
+                cascaderProps: {
+                    label: 'FirstKindName',
+                    value: 'FirstKindId',
+                    children: 'Chlidren'
+                },
+                cascaderPropsTwo: {
+                    label: 'MajorKindName',
+                    value: 'MajorKindId',
+                    children: 'Chlidren'
+                },
+                Grade: [{
+                    value: 'A',
+                    label: 'A'
+                },
+                {
+                    value: 'B',
+                    label: 'B'
+                },
+                {
+                    value: 'C',
+                    label: 'C'
+                }
+                ],
+
+                HumanBankoptions: [{
+                    value: '中国银行',
+                    label: '中国银行'
+                },
+                {
+                    value: '中国建设银行',
+                    label: '中国建设银行'
+                }],
+                Sexoptions: [{
+                    value: '男',
+                    label: '男'
+                },
+                {
+                    value: '女',
+                    label: '女'
+                }],
+
+                resp: [],
+                config_public_char: [],
+                config_public_char2: [],
+                config_public_char3: [],
+                config_public_char4: [],
+                config_public_char5: [],
+                config_public_char6: [],
+                config_public_char7: [],
+                config_public_char8: [],
+                config_public_char9: [],
+                config_public_char10: [],
+                config_public_char11: [],
+            },
+
+            methods: {
+                fill() {
+                    var id = localStorage.getItem("HufId2");
+                    this.AddForm.HufId = id;
+                    axios.get('/ArchiveRegistration/HFSelecteById/'+id)
+                        .then(res => {
+                            this.AddForm = res.data;
+                            this.selectedKey = [res.data.FirstKindId, res.data.SecondKindId, res.data.ThirdKindId];
+                            this.selectedKeysTwo = [res.data.HumanMajorKindId, res.data.HumanMajorId];
+                            this.AddForm.FirstKindId = res.data.FirstKindId;
+                            this.AddForm.SecondKindId = res.data.SecondKindId;
+                            this.AddForm.ThirdKindId = res.data.ThirdKindId;
+                            this.AddForm.FirstKindName = res.data.FirstKindName;
+                            this.AddForm.SecondKindName = res.data.SecondKindName;
+                            this.AddForm.ThirdKindName = res.data.ThirdKindName;
+                            this.AddForm.HumanMajorKindId = res.data.HumanMajorKindId;
+                            this.selectedKeysTwo = [res.data.HumanMajorKindId, res.data.HumanMajorId];
+                            this.AddForm.HumanMajorKindId = res.data.HumanMajorKindId,
+                            this.AddForm.HumanMajorId = res.data.HumanMajorId,
+                            this.AddForm.HumanMajorKindName = res.data.HumanMajorKindName,
+                            this.AddForm.HunmaMajorName = res.data.HunmaMajorName,
+                            this.AddForm.EngageType = res.data.EngageType;
+                            this.AddForm.HumanName = res.data.HumanName;
+                            this.AddForm.HumanAddress = res.data.HumanAddress;
+                            this.AddForm.HumanPostcode = res.data.HumanPostcode;
+                            this.AddForm.HumanTelephone = res.data.HumanTelephone;
+                            this.AddForm.HumanHomephone = res.data.HumanHomephone;
+                            this.AddForm.HumanMobilephone = res.data.HumanMobilephone;
+                            this.AddForm.HumanEmail = res.data.HumanEmail;
+                            this.AddForm.HumanHobby = res.data.HumanHobby;
+                            this.AddForm.HumanSpeciality = res.data.HumanSpeciality;
+                            this.AddForm.HumanSex = res.data.HumanSex;
+                            this.AddForm.HumanReligion = res.data.HumanReligion;
+                            this.AddForm.HumanParty = res.data.HumanParty;
+                            this.AddForm.HumanNationality = res.data.HumanNationality;
+                            this.AddForm.HumanRace = res.data.HumanRace;
+                            this.AddForm.HumanBirthday = res.data.HumanBirthday;
+                            this.AddForm.HumanAge = res.data.HumanAge;
+                            this.AddForm.HumanEducatedDegree = res.data.HumanEducatedDegree;
+                            this.AddForm.HumanEducatedYears = res.data.HumanEducatedYears;
+                            this.AddForm.HumanEducatedMajor = res.data.HumanEducatedMajor;
+                            this.AddForm.HumanCollege = res.data.HumanCollege;
+                            this.AddForm.HumanIdCard = res.data.HumanIdCard;
+                            this.AddForm.HumanBirthplace = res.data.HumanBirthplace;
+                            this.AddForm.DemandSalaryStandard = res.data.DemandSalaryStandard;
+                            this.AddForm.Remark = res.data.Remark;
+                            this.AddForm.RegistTime = res.data.RegistTime;
+                            this.imageUrl = res.data.HumanPicture;
+                            this.AddForm.HumanPicture = res.data.HumanPicture;
+                            this.AddForm.Recomandation = res.data.Recomandation;
+                            this.AddForm.HumanHistroyRecords = res.data.HumanHistroyRecords;
+                            this.AddForm.HumanProDesignation = res.data.HumanProDesignation;
+                            this.AddForm.HumanSocietySecurityId = res.data.HumanSocietySecurityId;
+                            this.AddForm.SalaryStandardId = res.data.SalaryStandardId;
+                            this.StandardName2 = res.data.SalaryStandardName;
+                            this.AddForm.HumanBank = res.data.HumanBank;
+                            this.AddForm.HumanAccount = res.data.HumanAccount;
+                            this.AddForm.HumanQQ = res.data.HumanQQ;
+                            this.AddForm.HumanFamilyMembership = res.data.HumanFamilyMembership;
+                            this.AddForm.HumanId = res.data.HumanId;
+                            console.log(res)
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        });
+
+
+                },
+                dakai() {
+                    window.open("../Uploader/" + this.AddForm.AttachmentName, "_blank");
+                },
+                dakai1() {
+                    window.open("../Uploader/" + this.AddForm.HumanHistoryRecords, "_blank");
+                },
+
+                //级联下拉框查询
+                jilian: function () {
+                    axios.get("/ArchiveRegistration/CascadeAsync").then((res) => {
+                        this.parentCateList = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                    })
+                    axios.get('/ArchiveRegistration/ZhiWeiCascadeAsync').then((res) => {
+                        this.parentCateListTwo = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                    })
+                },
+                //级联下拉框选择改变事件
+                parentCateChanged: function () {
+                    console.info(this.selectedKey.length);
+                    if (this.selectedKey.length > 0) {
+                        this.sz = this.$refs["casc"].getCheckedNodes()[0].pathLabels;
+                    }
+                },
+                //级联下拉框选择改变事件
+                parentCateChangedTwo: function () {
+                    console.info(this.selectedKeysTwo.length);
+                    if (this.selectedKeysTwo.length > 0) {
+                        this.sv = this.$refs["cascT"].getCheckedNodes()[0].pathLabels;
+                    }
+                },
+                //薪酬下拉取值
+                SalaryStandardNameChanged(params) {
+                    const { value, label } = params;
+                    this.AddForm.SalaryStandardName = label;
+                    this.AddForm.SalaryStandardId = value;
+
+                },
+                save() {
+                    this.$refs["AddForm"].resetFields();
+                },
+                submitForm: function (formName) {
+                    this.$refs[formName].validate((valid) => {
+                        if (valid) {
+                            this.Add();
+                        } else {
+                            console.info('err submit');
+                            return false;
+                        }
+                    })
+
+                },
+                Xia: function () {
+                    axios.get('/ResumeManagement/GuoJiSelecte').then(res => {
+                        this.config_public_char = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/MinZuSelecte').then(res => {
+                        this.config_public_char2 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/ZongJiaoSelecte').then(res => {
+                        this.config_public_char3 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/JYNianXianSelecte').then(res => {
+                        this.config_public_char4 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/ZhuanYeSelecte').then(res => {
+                        this.config_public_char5 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/XueLiSelecte').then(res => {
+                        this.config_public_char6 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/TeChangSelecte').then(res => {
+                        this.config_public_char7 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/AiHaoSelecte').then(res => {
+                        this.config_public_char8 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/ZZMianMaoSelecte').then(res => {
+                        this.config_public_char9 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/ResumeManagement/ZhiChengSelecte').then(res => {
+                        this.config_public_char10 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+                    axios.get('/Salaryscale/SelectSSDAsync').then(res => {
+                        this.config_public_char11 = res.data;
+                    }).catch(err => {
+                        console.info(err);
+                        return;
+                    })
+
+                },
+
+                pictureSuccess: function (res, file) {
+                    this.imageUrl = URL.createObjectURL(file.raw);
+                    this.AddForm.humanPicture = res
+                    this.getpurl(res);
+
+                },
+               
+                check: function () {
+                    //获得系统当前时间的方法
+                    this.tick();
+                },
+
+            },
+            mounted: function () {
+                this.fill();
+                this.jilian();
+                this.Xia();
+                window.onload = this.tick;
+                this.AddForm.HumanSex = this.Sexoptions[0].value
+              
+            }
+        })
+    </script>
+    <style>
+        .avatar-uploader .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .avatar-uploader .el-upload:hover {
+                border-color: #409EFF;
+            }
+
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 178px;
+            height: 178px;
+            line-height: 178px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 178px;
+            height: 178px;
+            display: block;
+        }
+
+        .upload {
+            display: inline-block;
+            margin-left: 1300px;
+            margin-top: -160px;
+        }
+
+        .bnt {
+            margin-left: 250px;
+        }
+    </style>
+</body>
+</html>

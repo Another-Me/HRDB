@@ -1,0 +1,188 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>III级机构增加</title>
+</head>
+<body>
+    <div id="app">
+        <table width="100%">
+            <tr>
+                <td>
+                    <font color="black">
+                        您正在做的业务是：人力资源--客户化设置--人力资源档案管理设置--II级机构设置--III级机构添加
+                    </font>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <el-button type="primary" v-on:click="Insert()">提交</el-button>
+                    <a href="/Customization/Level3">返回</a>
+                </td>
+            </tr>
+        </table>
+
+
+        <table width="100%" border="1" cellpadding=0 cellspacing=1
+               bordercolorlight=#848284 bordercolordark=#eeeeee
+               class="TABLE_STYLE1">
+            <tr>
+                <td width="19%" class="TD_STYLE1">
+                    机构名称
+                </td>
+                <td width="81%" class="TD_STYLE2">
+                    <el-cascader v-model="value1"
+                                 :options="options"
+                                 :props="d"
+                                 ref="refs"
+                                 v-on:change="handleChange"></el-cascader>
+                </td>
+            </tr>
+            <tr>
+                <td width="19%" class="TD_STYLE1">
+                    III级机构编号
+                </td>
+                <td width="81%" class="TD_STYLE2">
+                    <el-input v-model="ThirdKindId" placeholder="请输入内容" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    III级机构名称
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="ThirdKindName" placeholder="请输入内容" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    销售负责人编号
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="ThirdKindSaleId" placeholder="请输入内容" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    是否为零售店
+                </td>
+                <td class="TD_STYLE2">
+                    <el-select v-model="field" placeholder="请选择">
+                        <el-option v-for="item in options1"
+                                   :key="item.value"
+                                   :label="item.label"
+                                   :value="item.value">
+                        </el-option>
+                    </el-select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                value1: [],
+                options:[],
+                label: '',
+                d: {
+                    label: 'FirstKindName', value: 'FirstKindId', children: 'childern'
+                },
+                options1: [{
+                    value: '是',
+                    label: '是'
+                }, {
+                    value: '否',
+                    label: '否'
+                    }],
+
+                field:'',
+
+                FirstKindId:'',
+                FirstKindName:'',
+                SecondKindName: '',
+                SecondKindId: '',
+
+                ThirdKindId: '',
+                ThirdKindName: '',
+                ThirdKindSaleId:''
+
+            },
+            methods: {
+                //查询一级编号与名称
+                fill() {
+                    axios.get('/Customization/CFTKLJInsetAsync')
+                        .then(res => {
+                            console.log(res.data);
+                            this.options =res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+               
+                handleChange() {
+                    const a = [];
+                    const b = [];
+                    const arr = this.$refs["refs"].getCheckedNodes()[0].pathNodes;
+                    arr.forEach((i) => {
+                        a.push(i.label);
+                        b.push(i.value);
+                    });
+
+                    this.FirstKindId = b[0];
+                    this.FirstKindName = a[0];
+
+                    this.SecondKindName = a[1];
+                    this.SecondKindId = b[1];
+                },
+                Insert() {
+                    axios.post('/Customization/CFTKInsert', {
+                        FirstKindId: this.FirstKindId,
+                        FirstKindName: this.FirstKindName,
+                        SecondKindId: this.SecondKindId,
+                        SecondKindName: this.SecondKindName,
+                        ThirdKindId: this.ThirdKindId,
+                        ThirdKindName: this.ThirdKindName,
+                        ThirdKindSaleId: this.ThirdKindSaleId,
+                        ThirdKindIsRetail: this.field
+                    })
+                        .then(res => {
+                            if (res.data>0) {
+                                alert("增加成功")
+                            } else {
+                                alert("增加失败")
+                            }
+                        })
+                        .catch(err => {
+                            //console.log(err);
+                            alert("CFTK增加失败")
+                        })
+                    //console.log("一级编号：" + this.FirstKindId);
+                    //console.log("一级名称：" + this.FirstKindName);
+                    //console.log("二级编号：" + this.SecondKindId);
+                    //console.log("二级编号：" + this.SecondKindName);
+                    //console.log("三级编号：" + this.ThirdKindId);
+                    //console.log("三级名称：" + this.ThirdKindName);
+                    //console.log("销售负责人编号：" + this.ThirdKindSaleId);
+                    //console.log("是否：" + this.field);
+                }
+            },
+            mounted: function () {
+                this.fill()
+            }
+        })
+    </script>
+</body>
+</html>

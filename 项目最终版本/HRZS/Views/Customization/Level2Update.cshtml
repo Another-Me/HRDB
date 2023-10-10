@@ -1,0 +1,179 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>II级机构修改</title>
+</head>
+<body>
+    <div id="app">
+        <table width="100%">
+            <tr>
+                <td>
+                    <font color="black">
+                        您正在做的业务是：人力资源--客户化设置--人力资源档案管理设置--II级机构设置--II级机构修改
+                    </font>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <el-button type="primary" v-on:click="Insert()">提交</el-button>
+                    <a href="/Customization/Level2">返回</a>
+                </td>
+            </tr>
+        </table>
+
+
+        <table width="100%" border="1" cellpadding=0 cellspacing=1
+               bordercolorlight=#848284 bordercolordark=#eeeeee
+               class="TABLE_STYLE1">
+            <tr>
+                <td width="19%" class="TD_STYLE1">
+                    I级机构名称
+                </td>
+                <td width="81%" class="TD_STYLE2">
+                    <el-select v-model="value" placeholder="请选择" v-on:change="selectProductType">
+                        <el-option v-for="item in options"
+                                   :key="item.FirstKindId"
+                                   :label="item.FirstKindName"
+                                   :value="{ value: item.FirstKindName, label: item.FirstKindId}">
+                        </el-option>
+                    </el-select>
+                </td>
+            </tr>
+            <tr>
+                <td width="19%" class="TD_STYLE1">
+                    II级机构编号
+                </td>
+                <td width="81%" class="TD_STYLE2">
+                    <el-input v-model="SecondKindId" placeholder="请输入内容" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    II级机构名称
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="SecondKindName" placeholder="请输入内容" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    薪酬发放责任人编号
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="SecondSalaryId" placeholder="请输入内容" style="width:30%"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">
+                    销售责任人编号
+                </td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="SecondSaleId" placeholder="请输入内容" style="width:30%"></el-input>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                options: [],
+                value: '',
+                label:'',
+                SecondKindId:'',
+                SecondKindName:'',
+                SecondSalaryId: '',
+                SecondSaleId: '',
+                id:1
+            },
+            methods: {
+                //查询二级指定数据
+                fill() {
+                    this.id = sessionStorage.getItem("uid");
+                    axios.get('/Customization/CFSKDyidSelect',{
+                        params: {
+                            id: this.id
+                        }
+                    })
+                        .then(res => {
+                            //console.log(res.data);
+                            this.value = res.data.FirstKindName 
+                            this.label = res.data.FirstKindId
+                            this.SecondKindId = res.data.SecondKindId
+                            this.SecondKindName = res.data.SecondKindName
+                            this.SecondSalaryId = res.data.SecondSalaryId
+                            this.SecondSaleId = res.data.SecondSaleId
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //查询一级编号与名称
+                frll() {
+                    axios.get('/Customization/CFFKselect')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.options = res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //获取下拉显示和隐式
+                selectProductType(data) {
+                    // 将data对象解构
+                    const { value, label } = data;
+                    this.label = label;
+                    this.value = value;
+                },
+                //二级修改
+                Insert() {
+                    //console.log("自增id："+this.id);
+                    //console.log(this.label);
+                    //console.log(this.value);
+                    axios.get('/Customization/CFSKUpdate', {
+                        params: {
+                            FskId:this.id,
+                            FirstKindId: this.label,
+                            FirstKindName: this.value,
+                            SecondKindId: this.SecondKindId,
+                            SecondKindName: this.SecondKindName,
+                            SecondSalaryId: this.SecondSalaryId,
+                            SecondSaleId: this.SecondSaleId
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data);
+                            if (res.data > 0) {
+                                alert("修改成功")
+                            } else {
+                                alert("修改失败")
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            console.log("二级机构修改失败");
+                        })
+                }
+            },
+            mounted: function () {
+                this.fill()
+                this.frll()
+            }
+        })
+    </script>
+</body>
+</html>
+

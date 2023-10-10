@@ -1,0 +1,379 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <script src="~/echarts.min.js"></script>
+    <title>发放登记页-3</title>
+</head>
+<body>
+    <div id="app">
+        <table width="100%">
+            <tr>
+                <td colspan="2" style="text-align: left">
+                    <font color="black">
+                        您正在做的业务是：人力资源--薪酬标准管理--薪酬发放登记
+                    </font>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: right;">
+                    <el-button type="primary" v-on:click="zenjia()">提交</el-button>
+                    <el-button type="success" v-on:click="fanhui()">返回</el-button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: left">
+                    薪酬单编号：<el-input placeholder="请输入内容" style="width:10%" prop="SalaryStandardId" v-model="SalaryStandardId" :disabled="true"></el-input>
+                    <input type="hidden" name="salaryGrant.salaryGrantId" value="HS1353753198460">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: left">
+                    机构：
+
+                    <el-input placeholder="请输入内容" style="width:10%" v-model="institution" :disabled="true"></el-input>
+
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    本机构总人数:<el-input placeholder="请输入内容" style="width:10%" v-model="we" :disabled="true"></el-input>
+                    <input type="hidden" name="salaryGrant.humanAmount" value="5">
+                    ，基本薪酬总数:<el-input placeholder="请输入内容" style="width:10%" v-model="jine" :disabled="true"></el-input><input type="hidden" name="salaryGrant.salaryStandardSum" value="139823.0" />
+                    ，实发总额:<span id="salarySum_sum"><el-input placeholder="请输入内容" style="width:10%" v-model="jia" :disabled="true"></span>
+                    <input type="hidden" id="salaryPaidSum" name="salaryGrant.salaryPaidSum" value="139823.0" />
+
+                </td>
+                <td>
+                    <div>登记人:<el-input v-model="Register" placeholder="请输入内容" style="width:30%"></el-input></div>
+                    登记时间：<span id="real-time-clock"></span>
+                </td>
+            </tr>
+        </table>
+        <el-table :data="tableData"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="xuhao"
+                             label="序号">
+            </el-table-column>
+            <el-table-column prop="HumanId"
+                             label="档案编号">
+            </el-table-column>
+            <el-table-column prop="HumanName"
+                             label="姓名">
+            </el-table-column>
+            <el-table-column label="薪酬基本明细" prop="SalarySum" >
+                <template slot-scope="scope">
+                    <el-button type="primary" round v-on:click="dialogVisible=true,detailed(scope.row)">详细信息</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="BounsSum" label="奖励金额">
+                <template slot-scope="scope">
+                    <el-input-number v-model="scope.row.BounsSum" v-on:change="handleChange(scope.row)" :min="0" :max="9999" label="描述文字"></el-input-number>
+                </template>
+            </el-table-column>
+            <el-table-column prop="SaleSum" label="销售绩效总额">
+                <template slot-scope="scope">
+                    <el-input-number v-model="scope.row.SaleSum" v-on:change="handleChange(scope.row)" :min="0" :max="9999" label="描述文字"></el-input-number>
+                </template>
+            </el-table-column>
+            <el-table-column prop="DeductSum" label="应扣金额">
+                <template slot-scope="scope">
+                    <el-input-number v-model="scope.row.DeductSum" v-on:change="handleChange(scope.row)" :min="0" :max="9999" label="描述文字"></el-input-number>
+                </template>
+            </el-table-column>
+            <el-table-column label="实发金额" prop="PaidSalarySum">
+                
+            </el-table-column>
+        </el-table>
+
+        <el-dialog title="提示"
+                   :visible.sync="dialogVisible"
+                   width="30%"
+                   :before-close="handleClose">
+            <div id="Pie" style="width: 600px; height:400px"></div>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" v-on:click="dialogVisible = false">确 定</el-button>
+            </span>
+        </el-dialog>
+
+    </div>
+    <script type="text/javascript">
+        var sj = "";
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                Register: '',
+                SalaryStandardId: '',
+                institution: '',
+                we: '',
+                jine: '',
+                levelid: 0,
+                BounsSum: 0,
+                SaleSum: 0,
+                DeductSum: 0,
+                dialogVisible: false,
+                table: [],
+                amount: 0,
+                zon: 0,
+                jia: 0,
+                jihe: [],
+                num: '',
+                Sex : [],	//定义数组
+                Info : []
+
+            },
+            methods: {
+                //窗体加载
+                fill() {
+                    this.institution = sessionStorage.getItem("institution")
+                    this.we = sessionStorage.getItem("we")
+                    this.jine = sessionStorage.getItem("jine")
+                    this.levelid = sessionStorage.getItem("fhid")
+                    axios.get('/Issue/HFcopiesSelectCondition', {
+                        params: {
+                            id: this.levelid,
+                            name: this.institution
+                        }
+                    })
+                        .then(res => {
+                            this.tableData = res.data
+                            for (var i in res.data) {
+                                this.SalaryStandardId = res.data[0].SalaryStandardId
+                            }
+                        })
+                        .catch(err => {
+                            //console.log("出问题");
+                            console.log(err);
+                        })
+                },
+                fell() {
+                    axios.get('/Issue/HFSelectCondition', {
+                        params: {
+                            id: this.levelid,
+                            name: this.institution
+                        }
+                    })
+                        .then(res => {
+                            this.jihe = res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //计算金额
+                handleChange(row) {
+                    row.PaidSalarySum = Number(row.SalarySum) + Number(row.BounsSum) + Number(row.SaleSum) - Number(row.DeductSum);
+                    this.amount = row.PaidSalarySum
+                    for (var i in this.tableData) {
+                        this.zon += this.tableData[i].PaidSalarySum 
+                    }
+                    this.jia = this.zon
+                    this.zon = 0
+                },
+                //返回按钮(按钮已删)
+                handleClose(done) {
+                    this.$confirm('确认关闭？')
+                        .then(_ => {
+                            done();
+                        })
+                        .catch(_ => { });
+                },
+                //薪酬发放登记查询薪酬详细信息
+                detailed(row) {
+                    console.log(row.SalaryStandardId);
+                    axios.get('/Issue/SSDdetailed', {
+                        params: {
+                            name: row.SalaryStandardId
+                        }
+                    })
+                        .then(res => {
+                            //this.table = res.data
+                            console.log(res.data);
+                            for (var i in res.data) {
+                                this.Info[i] = { value: res.data[i].Salary, name: res.data[i].ItemName };
+                            }
+                            for (var i in res.data) {
+                                this.Sex[i] = res.data[i].ItemName;//以JSON的方式接收字符串
+                            }
+                            this.InitPie(this.Sex, this.Info);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                InitPie(Sex, Info) {
+                    var myChartPie = echarts.init(document.getElementById('Pie'));
+                    option_Pie = {
+                        title: {
+                            text: '补助金额',	//可视化主标题
+                            textStyle: {
+                                color: 'red',
+                                fontWeight: 'bold',
+                                fontStyle: 'italic',
+                                fontFamily: '微软雅黑'
+                            },	//主标题的样式
+                            subtext: '补助金额对比',	//副标题
+                            subtextStyle: {
+                                color: 'black',
+                                fontFamily: '微软雅黑'
+                            },	//副标题的样式
+                            x: 'center'
+                        },
+                        //图例
+                        legend: {
+                            data: Sex,
+                            orient: 'vertical',	//图例列表的布局朝向，取值：'vertical'/'horizontal'
+                            left: '10%',
+                        },
+                        //提示框组件
+                        tooltip: {
+                            trigger: 'item',	//触发类型；item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用；axis：坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用
+                            formatter: "{a}<br/>{b} ：{c}元 ({d}%)"
+                        },
+                        //工具组件：如：下载保存统计图表、切换为折线图、切换为柱状图
+                        toolbox: {
+                            feature: {
+                                saveAsImage: { show: true }
+                            }
+                        },
+                        label: {
+                            show: true,
+                        },
+                        series: [{
+                            name: '补助:',
+                            radius: '50%',// 设置环形饼状图， 第一个百分数设置内圈大小，第二个百分数设置外圈大小
+                            center: ['50%', '55%'], // 设置饼状图位置，第一个百分数调水平位置，第二个百分数调垂直位置
+                            data: Info,
+                            type: 'pie',
+                        }]
+                    }
+                    myChartPie.setOption(option_Pie);
+                },
+                //增加sg表数据
+                zenjia() {
+                    this.num = Math.floor(Math.random() * 10000000 + 9999999);
+                    //console.log("薪酬发放编号" + this.num);
+                    //console.log("薪酬标准编号" + this.SalaryStandardId);
+
+                    /*this.Sgdinsert()*/
+                    axios.post('/Issue/SgInpsert', {
+                        SalaryGrantId: this.num,
+                        SalaryStandardId: this.SalaryStandardId,
+                        FirstKindId: this.jihe.FirstKindId ,
+                        FirstKindName: this.jihe.FirstKindName,
+                        SecondKindId: this.jihe.SecondKindId,
+                        SecondKindName: this.jihe.SecondKindName ,
+                        ThirdKindId: this.jihe.ThirdKindId,
+                        ThirdKindName: this.jihe.ThirdKindName,
+                        HumanAmount: this.we,
+                        SalaryStandardSum: this.jine,
+                        SalaryPaidSum: this.jia,
+                        Register: this.Register,
+                        RegistTime: new Date()
+                    })
+                        .then(res => {
+                            if (res.data == 1) {
+                               /* alert("sg增加成功")*/
+                                this.Sgdinsert()
+                            } else {
+                                alert("sg增加失败")
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //增加sgd表数据
+                Sgdinsert() {
+                    for (var i in this.tableData) {
+                        console.log("薪酬发放编号" + this.num);
+                        console.log("档案编号" + this.tableData[i].HumanId);
+                        axios.post('/Issue/SgdInpsert', {
+                            SalaryGrantId: this.num,
+                            HumanId: this.tableData[i].HumanId,
+                            HumanName: this.tableData[i].HumanName,
+                            BounsSum: this.tableData[i].BounsSum,
+                            SaleSum: this.tableData[i].SaleSum,
+                            DeductSum: this.tableData[i].DeductSum,
+                            SalaryStandardSum: this.tableData[i].SalarySum,
+                            SalaryPaidSum: this.tableData[i].PaidSalarySum
+                        })
+                            .then(res => {
+                                if (res.data == 1) {
+                                   /* alert("sgd增加成功")*/
+                                } else {
+                                    alert("sgd增加失败")
+                                }
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
+                    }
+                    alert("增加成功")
+                    window.location = "/Issue/Review";
+                },
+                fanhui() {
+                    window.location.href = '../Issue/checkout';
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+                this.fell()
+                //console.log(this.institution);
+                //console.log(this.we);
+                //console.log(this.jine);
+                //this.amount = Number(this.jine)
+                
+            },
+        })
+        function updateClock() {
+            //获取时间
+            var currentTime = new Date();
+
+
+            //获取年月日
+            var year = currentTime.getFullYear();
+            var month = currentTime.getMonth() + 1;
+            var day = currentTime.getDate();
+
+            //获取时分秒
+            var hours = currentTime.getHours();
+            var minutes = currentTime.getMinutes();
+            var seconds = currentTime.getSeconds();
+
+            // 添加前导零，确保时间始终以两位数显示
+            hours = (hours < 10 ? "0" : "") + hours;
+            minutes = (minutes < 10 ? "0" : "") + minutes;
+            seconds = (seconds < 10 ? "0" : "") + seconds;
+
+            // 构建时间字符串
+            var timeString = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+
+            //连接到div，更新页面上显示时间的元素
+            document.getElementById("real-time-clock").innerHTML = timeString;
+
+            //赋值
+            this.sj = timeString;
+        }
+        // 每秒钟调用一次updateClock函数
+        setInterval(updateClock, 1000);
+
+
+    </script>
+</body>
+</html>

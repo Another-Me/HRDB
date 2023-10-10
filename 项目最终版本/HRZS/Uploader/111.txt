@@ -1,0 +1,16 @@
+//反射
+//Type类型
+//1.根据嘞。根据对象。根据程序集
+
+Type type = typeof(Demo)
+
+//根据类的类型创建类的实例对象
+
+object obj = Activator.CreateInstance(type);
+
+//根据名字获取属性值
+PropertyInfo.propertyInfo = type.SetProperty("Age")
+
+//属性对象赋值
+
+propertyInfo.SetValue(obj,20)

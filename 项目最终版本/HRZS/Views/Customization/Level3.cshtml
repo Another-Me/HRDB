@@ -1,0 +1,139 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>三级机构</title>
+</head>
+<body>
+    <div id="app">
+        <div style="margin:10px"><el-button type="primary" round v-on:click="Insert()">增加</el-button></div>
+        <el-table :data="table"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="FirstKindName"
+                             label="I级机构名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="SecondKindName"
+                             label="II级机构名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="SecondKindId"
+                             label="III级机构编号"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="ThirdKindName"
+                             label="III级机构名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="ThirdKindSaleId"
+                             label="销售负责人编号">
+            </el-table-column>
+            <el-table-column prop="ThirdKindIsRetail"
+                             label="是否为零售店">
+            </el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle v-on:click="Update(scope.row.FtkId)"></el-button>
+                    <el-button type="danger" icon="el-icon-delete" circle v-on:click="Delete(scope.row.FtkId)"></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination v-on:size-change="handleSizeChange"
+                       v-on:current-change="handleCurrentChange"
+                       :current-page="currentPage"
+                       :page-sizes="[3, 6, 9, 12]"
+                       :page-size="pageSize"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="rows">
+        </el-pagination>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                table: [],
+                currentPage: 1,
+                pageSize: 3,
+                rows: 1
+            },
+            methods: {
+                //窗体加载
+                fill() {
+                    axios.get('/Customization/CFTKFenye', {
+                        params: {
+                            CurrentPage: this.currentPage,
+                            PageSize: this.pageSize
+                        }
+                    })
+                        .then(res => {
+                            //console.log(res.data.List);
+                            this.table = res.data.List
+                            this.rows = res.data.Rows
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            alert("CFTK分页查询失败");
+                        })
+                },
+                //换页
+                handleSizeChange: function (size) {
+                    this.pageSize = size
+                    this.fill()
+                },
+                handleCurrentChange: function (page) {
+                    this.currentPage = page
+                    this.fill()
+                },
+                //跳转到增加页面
+                Insert() {
+                    window.location.href ='../Customization/Level3Insert';
+                },
+                //删除事件
+                Delete(id) {
+                    alert(id)
+                    if (confirm('确认删除吗')) {
+                        axios.get('/Customization/CFTKDelete', {
+                            params: {
+                                id:id
+                            }
+                        })
+                            .then(res => {
+                                if (res.data > 0) {
+                                    alert("删除成功")
+                                    this.fill()
+                                } else {
+                                    alert("删除失败")
+                                }
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
+                    }
+                },
+                //跳转修改
+                Update(id) {
+                    //传输id
+                    sessionStorage.setItem("uid",id)
+                    window.location.href = '../Customization/Level3Update?id='+id;
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+            },
+        })
+    </script>
+</body>
+</html>

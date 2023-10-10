@@ -1,0 +1,118 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>用户管理</title>
+</head>
+<body>
+    <div id="app">
+        <el-button type="primary" v-on:click="zengjia()">增加</el-button>
+        <el-table :data="tableData"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="RolesID"
+                             label="用户编号"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="UName"
+                             label="用户名称"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="UTrueName"
+                             label="真实姓名">
+            </el-table-column>
+            <el-table-column prop="UPassWord"
+                             label="用户密码">
+            </el-table-column>
+            <el-table-column prop="RolesName"
+                             label="用户身份">
+            </el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle v-on:click="inserts(scope.row.UId)"></el-button>
+                    <el-button type="danger" icon="el-icon-delete" circle v-on:click="deletes(scope.row.UId)"></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <script type="text/javascript">
+        var sj = "";
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+            },
+            methods: {
+                //查询用户数据
+                fill() {
+                    var name = sessionStorage.getItem("name");
+                    this.Register=name
+                    axios.get('/Permissions/RolesUserSelect')
+                        .then(res => {
+                            //console.log(res.data);
+                            this.tableData = res.data
+
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //删除
+                deletes(id) {
+                    console.log(id);
+                    axios.post("/Permissions/DeleteUser",{
+                        id:id
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                alert("用户删除成功");
+                                axios.post("/Permissions/UserRolesDelete", {
+                                    id: id
+                                })
+                                    .then(rse => {
+                                        if (rse.data > 0) {
+                                            alert("用户角色删除成功")
+                                            this.fill()
+                                        } else {
+                                            alert("用户角色删除失败")
+                                        }
+                                    })
+                                    .catch(eer => {
+                                        console.log(eer);
+                                    })
+                            } else {
+                                alert("用户删除失败");
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                zengjia() {
+                    window.location.href = '../Permissions/UsermanagementInsert';
+                },
+                inserts(id) {
+                    sessionStorage.setItem("userid", id)
+                    window.location.href = '../Permissions/UsermanagementUpdate';
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+            },
+        })
+    </script>
+</body>
+</html>

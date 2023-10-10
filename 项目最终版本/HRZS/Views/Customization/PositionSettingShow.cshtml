@@ -1,0 +1,154 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>PositionSettingShow</title>
+    <style>
+        .container {
+            background-color: #FFF1C4
+        }
+
+        .box-card {
+            background-color: #FFF1C4
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item>您正在做的业务是：人力资源--客户化设置--人力资源档案管理设置--职位设置  </el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <div>
+                <el-row>
+                    <el-col :span="6">
+                        <el-button type="primary" size="small" v-on:click="add()">添加</el-button>
+                    </el-col>
+                </el-row>
+                <el-table :data="table"
+                          style="width: 100%;"
+                          :cell-style="{'text-align':'center'}" :header-cell-style="{'text-align':'center'}">
+                    <el-table-column prop="MajorKindId"
+                                     label="职位分类编号"
+                                     width="flexColumnWidth(‘date’,tableData)">
+                    </el-table-column>
+                    <el-table-column prop="MajorKindName"
+                                     label="职位分类名称"
+                                     width="flexColumnWidth(‘date’,tableData)">
+                    </el-table-column>
+                    <el-table-column prop="MajorId"
+                                     label="职位编号"
+                                     width="flexColumnWidth(‘date’,tableData)">
+                    </el-table-column>
+                    <el-table-column prop="MajorName"
+                                     label="职位名称"
+                                     width="flexColumnWidth(‘date’,tableData)">
+
+                    </el-table-column>
+                    <el-table-column label="操作"
+                                     width="180">
+                        <template slot-scope="scope">
+                            <el-button type="primary" size="small" v-on:click="Delete(scope.row.MakId)">删除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <el-pagination v-on:size-change="handleSizeChange"
+                               v-on:current-change="handleCurrentChange"
+                               :currentpage="currentPage"
+                               :page-sizes="[3, 6, 9, 12]"
+                               :page-size="pageSize"
+                               layout="total, sizes, prev, pager, next, jumper"
+                               :total="rows">
+                </el-pagination>
+            </div>
+        </el-card>
+
+      
+    </div>
+    <script type="text/javascript">
+                var vm = new Vue({
+                    el: "#app",
+                    data: {
+                        table: [],
+                        currentPage: 1,
+                        pageSize: 3,
+                        rows: 1,
+                        src:"", 
+                    },
+                    methods: {
+                        //数据展示
+                        fill: function () {
+                            axios.get('/Customization/ShowData', {
+                                params: {
+                                    currentPage: this.currentPage,
+                                    pageSize: this.pageSize
+                                }
+                            })
+                                .then(res => {
+                                    //console.log(res);
+                                    this.table = res.data.List;
+                                    this.rows = res.data.Rows;
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                })
+                        },
+                        add(src) {
+                            window.location = "/Customization/PositionInsertShow/";
+                        },
+                       
+                        Delete: function (row) {
+                            alert(row)
+                            if (confirm('确认删除吗')) {
+                                axios.get('/Customization/CmmDelete', {
+                                    params: {
+                                        id: row
+                                    }
+                                })
+                                    .then(res => {
+                                        if (res.data > 0) {
+                                            alert("删除成功")
+                                            this.fill()
+                                        } else {
+                                            alert("删除失败")
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.log(err);
+                                    })
+
+                                //window.location = "/Customization/CMDelete/" + row;
+                            }
+                        },
+                        handleSizeChange: function (size) {
+                            this.pageSize = size;
+                            this.currentPage = 1;
+                            this.fill();
+                        },
+                        handleCurrentChange: function (page) {
+                            this.currentPage = page;
+                            this.fill();
+                        }
+                    },
+                    mounted: function () {
+                        this.currentPage = 1;
+                        this.fill();
+                    }
+                })
+
+    </script>
+</body>
+</html>

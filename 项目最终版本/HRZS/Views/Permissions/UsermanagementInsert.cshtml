@@ -1,0 +1,146 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="../../css/table.css" type="text/css" />
+    <script type="text/javascript" src="../../javascript/jquery-1.7.2.js"></script>
+    <script type="text/javascript"
+            src="../../javascript/jquery.messager.js"></script>
+    <script type="text/javascript" src="../../javascript/user_add.js"></script>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>用户管理增加</title>
+</head>
+<body>
+    <div id="app">
+        <table width="100%">
+            <tr>
+                <td>
+                    <font color="black">您正在做的业务是：人力资源--权限管理--添加用户</font>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <el-button type="primary" v-on:click="inserrts()">提交</el-button>
+                    <el-button type="success" v-on:click="fanhui()">返回</el-button>
+                </td>
+            </tr>
+        </table>
+        <table width="100%" border="1" cellpadding=3 cellspacing=1
+               bordercolorlight=#848284 bordercolordark=#eeeeee
+               class="TABLE_STYLE1">
+            <tr>
+                <td class="TD_STYLE1">用户名称</td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="UName" placeholder="请输入内容"></el-input>
+                </td>
+                <td class="TD_STYLE1">用户密码</td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="UPassWord" placeholder="请输入内容"></el-input>
+                </td>
+            </tr>
+            <tr>
+                <td class="TD_STYLE1">真实姓名</td>
+                <td class="TD_STYLE2">
+                    <el-input v-model="UTrueName" placeholder="请输入内容"></el-input>
+                </td>
+                <td class="TD_STYLE1">用户身份</td>
+                <td class="TD_STYLE2">
+                    <el-select v-model="value" placeholder="请选择">
+                        <el-option v-for="item in options"
+                                   :key="item.RolesID"
+                                   :label="item.RolesName"
+                                   :value="item.RolesID">
+                        </el-option>
+                    </el-select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        var sj = "";
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                options: [],
+                value: '',
+                UName: '',
+                UTrueName: '',
+                UPassWord: '',
+                Uid:0
+            },
+            methods: {
+                //查询用户数据
+                fill() {
+                    axios.get('/Permissions/RolesSelect')
+                        .then(res => {
+                            this.options = res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                inserrts() {
+                    axios.post('/Permissions/UserInsert', {
+                        UName: this.UName,
+                        UTrueName: this.UTrueName,
+                        UPassWord: this.UPassWord
+                    })
+                        .then(res => {
+                            if (res.data > 0) {
+                                alert("增加成功");
+                                axios.post('/Permissions/UserUidselect')
+                                    .then(rse => {
+                                        console.log(rse.data);
+                                        this.URinsert(rse.data)
+                                    })
+                                    .catch(eer => {
+                                        console.log(eer);
+                                    })
+                            } else {
+                                alert("增加失败")
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                URinsert(id) {
+                    console.log(id);
+                    axios.post('/Permissions/UserRolesInsert', {
+                        UserID: id,
+                        RolesID: this.value
+                    })
+                        .then(rse => {
+                            if (rse.data > 0) {
+                                console.log("用户角色增加成功");
+                            } else {
+                                console.log("用户角色增加失败");
+                            }
+                        })
+                        .catch(eer => {
+                            console.log(eer);
+                        })
+                },
+                fanhui() {
+                    window.location.href = '../Permissions/Usermanagement';
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+            },
+        })
+    </script>
+</body>
+</html>

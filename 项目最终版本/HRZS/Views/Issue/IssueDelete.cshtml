@@ -1,0 +1,82 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="~/css/table.css" type="text/css" />
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>薪酬发放详细-3</title>
+</head>
+<body>
+    <div id="app">
+        <el-table :data="tableData"
+                  height="250"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="HumanId"
+                             label="档案编号">
+            </el-table-column>
+            <el-table-column prop="HumanName"
+                             label="姓名">
+            </el-table-column>
+            <el-table-column prop="BounsSum"
+                             label="奖励金额">
+            </el-table-column>
+            <el-table-column prop="SaleSum"
+                             label="销售绩效总额">
+            </el-table-column>
+            <el-table-column prop="DeductSum"
+                             label="应扣金额">
+            </el-table-column>
+            <el-table-column prop="SalaryPaidSum"
+                             label="实发金额">
+            </el-table-column>
+        </el-table>
+        <el-button type="primary" v-on:click="fan()"> 返回 </el-button>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: []
+            },
+            methods: {
+                //窗体加载
+                fill() {
+                    this.SalaryGrantId = sessionStorage.getItem("SalaryGrantId")
+                    console.log("数："+this.SalaryGrantId);
+                    axios.get('/Issue/SelectSgdDyid', {
+                        params: {
+                            id: this.SalaryGrantId
+                        }
+                    })
+                        .then(res => {
+                            this.tableData = res.data
+                            console.log(res.data);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                fan() {
+                    window.location.href = '../Issue/IssueSelcets'
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+            },
+        })
+    </script>
+</body>
+</body>
+</html>

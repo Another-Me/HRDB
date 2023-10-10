@@ -1,0 +1,94 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/vue/dist/vue.js"></script>
+    <link href="~/Scripts/element-ui/lib/theme-chalk/index.css" rel="stylesheet" />
+    <script src="~/Scripts/element-ui/lib/index.js"></script>
+    <script src="~/Scripts/axios/dist/axios.js"></script>
+    <title>发放登记页-2</title>
+</head>
+<body>
+    <div id="app">
+        <el-table :data="tableData"
+                  border
+                  style="width: 100%">
+            <el-table-column prop="xuhao"
+                             label="序号">
+            </el-table-column>
+            <el-table-column prop="institution"
+                             label="机构名称">
+            </el-table-column>
+            <el-table-column prop="we"
+                             label="人数">
+            </el-table-column>
+            <el-table-column prop="jine"
+                             label="基本薪酬总额">
+            </el-table-column>
+            <el-table-column label="登记">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle v-on:click="dengji(scope.row)"></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                tableData: [],
+                levelid: 0,
+                sql:''
+            },
+            methods: {
+                //窗体加载
+                fill() {
+                    this.levelid = sessionStorage.getItem("fhid")
+                    //console.log(this.levelid);
+                    if (this.levelid == 1) {
+                        this.sql = "select ROW_NUMBER() OVER(ORDER BY hf.FirstKindName) as xuhao,[FirstKindName] as institution, count([FirstKindName]) as we ,sum([SalarySum]) as jine from [dbo].[HF] WHERE [FirstKindName] IS NOT NULL AND [SecondKindName] IS NULL and [ThirdKindName] IS NULL  group by[FirstKindName]"
+                    } else if (this.levelid == 2) {
+                        this.sql = "select ROW_NUMBER() OVER(ORDER BY hf.[SecondKindName]) as xuhao,[SecondKindName] as institution, count([SecondKindName]) as we ,sum([SalarySum]) as jine from [dbo].[HF] WHERE [FirstKindName] IS NOT NULL AND [SecondKindName] IS NOT NULL and [ThirdKindName] IS NULL  group by[SecondKindName]"
+                    } else if (this.levelid == 3) {
+                        this.sql = "select ROW_NUMBER() OVER(ORDER BY hf.[ThirdKindName]) as xuhao,[ThirdKindName] as institution, count([ThirdKindName]) as we ,sum([SalarySum]) as jine from [dbo].[HF] WHERE [FirstKindName] IS NOT NULL AND [SecondKindName] IS NOT NULL and [ThirdKindName] IS NOT NULL  group by[ThirdKindName]"
+                    }
+                    //console.log(this.sql);
+                    axios.get('/Issue/HFcopySelect', {
+                        params: {
+                            sql: this.sql
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data);
+                            this.tableData = res.data
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                },
+                //跳转页面-3
+                dengji(name) {
+                    //console.log(name.institution);
+                    //console.log(name.we);
+                    //console.log(name.jine);
+                    sessionStorage.setItem("institution", name.institution)
+                    sessionStorage.setItem("we", name.we)
+                    sessionStorage.setItem("jine", name.jine)
+                    window.location.href = '../Issue/checkots';
+                }
+            },
+            //窗体预加载事件
+            mounted: function () {
+                this.fill()
+            },
+        })
+    </script>
+</body>
+</html>
